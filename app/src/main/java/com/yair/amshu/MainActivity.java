@@ -1,29 +1,43 @@
 package com.yair.amshu;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.hardware.camera2.params.Face;
+import android.media.FaceDetector;
 import android.os.Bundle;
 
 import android.app.Activity;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+import org.opencv.objdetect.CascadeClassifier;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.List;
+
+import static org.opencv.core.Core.flip;
 
 public class MainActivity extends Activity implements View.OnTouchListener, CameraBridgeViewBase.CvCameraViewListener2 {
     private static final String  TAG              = "MainActivity";
@@ -33,8 +47,11 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     private Scalar ballcolorrgb, ballcolorhsv, counter;
     private Coloralgo ditaction;
     private Size spectorsize;
+    private CascadeClassifier cascadeClassifier;
 
     private CameraBridgeViewBase opencvcam;
+    Mat mat1;
+    private int absoluteFaceSize;
 
     private BaseLoaderCallback theLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -42,6 +59,8 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS:
                 {
+                    initializeOpenCVDependencies();
+
                     Log.i(TAG, "OpenCV loaded successfully");
                     opencvcam.enableView();
                     opencvcam.setOnTouchListener(MainActivity.this);
@@ -102,6 +121,8 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
     public void onCameraViewStarted(int width, int height) {
         thergba = new Mat(height, width, CvType.CV_8UC4);
+        mat1=new Mat(width,height, CvType.CV_8UC4);
+
         ditaction = new Coloralgo();
         thespectrum = new Mat();
         ballcolorrgb = new Scalar(255);
@@ -165,8 +186,9 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        thergba = inputFrame.rgba();
 
+
+        thergba = inputFrame.rgba();
         if (colorselect) {
             ditaction.process(thergba);
             List<MatOfPoint> contours = ditaction.getContours();
@@ -180,7 +202,33 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
             thespectrum.copyTo(spectrumLabel);
         }
 
-        return thergba;
+        mat1=thergba;
+        Mat mRgbaT = mat1.t();
+         flip(mat1.t(), mRgbaT, 0);
+        Imgproc.resize(mRgbaT, mRgbaT, mat1.size());
+
+        Imgproc.cvtColor(mRgbaT, mRgbaT, Imgproc.COLOR_RGBA2RGB);
+
+        MatOfRect faces = new MatOfRect();
+
+        // Use the classifier to detect faces
+        if (cascadeClassifier != null) {
+            cascadeClassifier.detectMultiScale(mRgbaT, faces, 1.1, 3, 2,
+                    new Size(absoluteFaceSize, absoluteFaceSize), new Size());
+        }
+
+        // If there are any faces found, draw a rectangle around it
+        Rect[] facesArray = faces.toArray();
+        for (int i = 0; i <facesArray.length; i++)
+            Imgproc.rectangle(mRgbaT, facesArray[i].tl(), facesArray[i].br(), new Scalar(0, 255, 0, 255), 3);
+        Mat mRgbaT2 = mRgbaT.t();
+        Imgproc.resize(mRgbaT2, mRgbaT2, mRgbaT.size());
+        flip(mRgbaT2,mRgbaT2, 1);
+
+        return mRgbaT2;
+
+
+       // return thergba;
     }
 
     private Scalar converScalarHsv2Rgba(Scalar hsvColor) {
@@ -190,5 +238,36 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
         return new Scalar(pointMatRgba.get(0, 0));
     }
+
+
+
+    private void initializeOpenCVDependencies() {
+
+        try {
+            // Copy the resource into a temp file so OpenCV can load it
+            InputStream is = getResources().openRawResource(R.raw.lbpcascade_frontalface);
+            File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
+            File mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
+            FileOutputStream os = new FileOutputStream(mCascadeFile);
+
+
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = is.read(buffer)) != -1) {
+                os.write(buffer, 0, bytesRead);
+            }
+            is.close();
+            os.close();
+
+            // Load the cascade classifier
+            cascadeClassifier = new CascadeClassifier(mCascadeFile.getAbsolutePath());
+        } catch (Exception e) {
+            Log.e("OpenCVActivity", "Error loading cascade", e);
+        }
+
+        // And we are ready to go
+     //   cameraBridgeViewBase.enableView();
+    }
+
 }
 
