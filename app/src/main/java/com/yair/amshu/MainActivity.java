@@ -55,7 +55,9 @@ public class MainActivity extends Activity implements CvCameraViewListener2 {
     private int                    mAbsoluteFaceSize   = 0;
 
     private CameraBridgeViewBase   mOpenCvCameraView;
-
+    static {
+       // System.loadLibrary("DetectionBasedTracker_jni");
+    }
     private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {

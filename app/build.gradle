@@ -3,17 +3,26 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 29
     buildToolsVersion "30.0.0"
-
+    sourceSets {
+        main {
+            // let gradle pack the shared library into apk
+            jniLibs.srcDirs = ['src/main/jniLibs']
+        }
+    }
     defaultConfig {
         applicationId "com.yair.amshu"
         minSdkVersion 22
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
+        ndk.abiFilters 'armeabi-v7a','arm64-v8a','x86','x86_64'
 
+        externalNativeBuild {
+
+        }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         ndk {
-            abiFilters "armeabi", "armeabi-v7a", "x86", "mips"
+            abiFilters "armeabi-v7a", "x86"
         }
     }
 
@@ -22,6 +31,13 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+    externalNativeBuild {
+
+    cmake {
+
+        path file('../openCVLibrary342/src/main/c/c/CMakeLists.txt')
+    }
     }
 }
 
