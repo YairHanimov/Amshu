@@ -16,6 +16,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.constraintlayout.solver.widgets.Rectangle;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
@@ -26,6 +28,7 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfRect;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -52,6 +55,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     private CameraBridgeViewBase opencvcam;
     Mat mat1;
     private int absoluteFaceSize;
+    private Rectangle R1;
 
     private BaseLoaderCallback theLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -187,11 +191,36 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
-
+        //Point aa;
         thergba = inputFrame.rgba();
         if (colorselect) {
             ditaction.process(thergba);
-            List<MatOfPoint> contours = ditaction.getContours();
+            final List<MatOfPoint> contours = ditaction.getContours();
+            Thread thread = new Thread() {
+
+                @Override
+                public void run() {
+                    try {
+                        Point aa=contours.get(0).toList().get(0);
+
+                        Log.i("Creation",R1.x+","+R1.y+","+R1.height+","+R1.width);
+                        Log.i("Creation",aa.toString());
+
+                        if(aa.x>R1.x&& aa.x<R1.x+R1.height&&aa.y<R1.y+R1.width&&aa.y>R1.y) {
+                            Log.i("Creation","kkkkkkk" + aa);
+
+                        }
+                        else{
+
+                        }
+                        }
+                     catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            thread.start();
+
             Log.e(TAG, "Contours count: " + contours.size());
             Imgproc.drawContours(thergba, contours, -1, counter);
 
@@ -204,7 +233,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
         mat1=thergba;
         Mat mRgbaT = mat1.t();
-         flip(mat1.t(), mRgbaT, 0);
+        flip(mat1.t(), mRgbaT, 0);
         Imgproc.resize(mRgbaT, mRgbaT, mat1.size());
 
         Imgproc.cvtColor(mRgbaT, mRgbaT, Imgproc.COLOR_RGBA2RGB);
@@ -219,8 +248,15 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
         // If there are any faces found, draw a rectangle around it
         Rect[] facesArray = faces.toArray();
-        for (int i = 0; i <facesArray.length; i++)
-            Imgproc.rectangle(mRgbaT, facesArray[i].tl(), facesArray[i].br(), new Scalar(0, 255, 0, 255), 3);
+        for (int i = 0; i <facesArray.length; i++) {
+            Imgproc.rectangle(mRgbaT, new Point(facesArray[i].x + 550, facesArray[i].y + 200),
+                    new Point(facesArray[i].x + 350, facesArray[i].y + 300), new Scalar(0, 255, 0, 255), 3);
+            Imgproc.rectangle(mRgbaT, new Point(facesArray[i].x-250, facesArray[i].y + 200),
+                    new Point(facesArray[i].x-50 , facesArray[i].y + 300), new Scalar(255, 255, 0, 255), 3);
+            Rectangle rect=new Rectangle();
+            rect.setBounds(facesArray[i].x,facesArray[i].y,200,100);
+            setRectangle(rect);
+        }
         Mat mRgbaT2 = mRgbaT.t();
         Imgproc.resize(mRgbaT2, mRgbaT2, mRgbaT.size());
         flip(mRgbaT2,mRgbaT2, 1);
@@ -228,7 +264,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         return mRgbaT2;
 
 
-       // return thergba;
+        // return thergba;
     }
 
     private Scalar converScalarHsv2Rgba(Scalar hsvColor) {
@@ -266,8 +302,10 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         }
 
         // And we are ready to go
-     //   cameraBridgeViewBase.enableView();
+        //   cameraBridgeViewBase.enableView();
     }
 
+    public void setRectangle(Rectangle rect){
+        this.R1=rect;
+    }
 }
-
