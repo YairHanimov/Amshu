@@ -56,7 +56,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     Mat mat1;
     private int absoluteFaceSize;
     private Rectangle R1;
-
+    private boolean flag=true;
     private BaseLoaderCallback theLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -190,7 +190,12 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     }
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        mat1=thergba;
+        Mat mRgbaT = mat1.t();
+        flip(mat1.t(), mRgbaT, 0);
+        Imgproc.resize(mRgbaT, mRgbaT, mat1.size());
 
+        Imgproc.cvtColor(mRgbaT, mRgbaT, Imgproc.COLOR_RGBA2RGB);
         //Point aa;
         thergba = inputFrame.rgba();
         if (colorselect) {
@@ -202,16 +207,18 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
                 public void run() {
                     try {
                         Point aa=contours.get(0).toList().get(0);
-
-                        Log.i("Creation",R1.x+","+R1.y+","+R1.height+","+R1.width);
-                        Log.i("Creation",aa.toString());
-
-                        if(aa.x>R1.x&& aa.x<R1.x+R1.height&&aa.y<R1.y+R1.width&&aa.y>R1.y) {
-                            Log.i("Creation","kkkkkkk" + aa);
-
+                        Point center = new Point();
+                        for(MatOfPoint list:contours){
+                            center=Kmeans(list);
                         }
-                        else{
-
+//                        Log.i("Creation", "aa"+String.valueOf(R1.x));
+//                        Log.i("Creation", String.valueOf(R1.x-R1.width));
+//                        Log.e(TAG, "Contours count: " + contours.size());
+                        Imgproc.drawMarker(thergba,center,new Scalar(255, 255, 0, 255));
+                        if(center.x<R1.y*8/6 && center.x>(R1.y-R1.height)*8/6 &&
+                                center.y < R1.x*6/8&& center.y > (R1.x-R1.width)*6/8) {
+                            Log.i("Creation","kkkkkkk" + aa);
+                            flag=!flag;
                         }
                         }
                      catch (Exception e) {
@@ -231,12 +238,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
             thespectrum.copyTo(spectrumLabel);
         }
 
-        mat1=thergba;
-        Mat mRgbaT = mat1.t();
-        flip(mat1.t(), mRgbaT, 0);
-        Imgproc.resize(mRgbaT, mRgbaT, mat1.size());
 
-        Imgproc.cvtColor(mRgbaT, mRgbaT, Imgproc.COLOR_RGBA2RGB);
 
         MatOfRect faces = new MatOfRect();
 
@@ -246,16 +248,28 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
                     new Size(absoluteFaceSize, absoluteFaceSize), new Size());
         }
 
+//        Imgproc.rectangle(mRgbaT, new Point(550,  200),
+//                new Point( 350,  300), new Scalar(0, 255, 0, 255), 3);
         // If there are any faces found, draw a rectangle around it
         Rect[] facesArray = faces.toArray();
         for (int i = 0; i <facesArray.length; i++) {
-            Imgproc.rectangle(mRgbaT, new Point(facesArray[i].x + 550, facesArray[i].y + 200),
-                    new Point(facesArray[i].x + 350, facesArray[i].y + 300), new Scalar(0, 255, 0, 255), 3);
-            Imgproc.rectangle(mRgbaT, new Point(facesArray[i].x-250, facesArray[i].y + 200),
-                    new Point(facesArray[i].x-50 , facesArray[i].y + 300), new Scalar(255, 255, 0, 255), 3);
             Rectangle rect=new Rectangle();
-            rect.setBounds(facesArray[i].x,facesArray[i].y,200,100);
-            setRectangle(rect);
+            if (flag) {
+                Imgproc.rectangle(mRgbaT, new Point(facesArray[i].x + 400, facesArray[i].y + 100),
+                        new Point(facesArray[i].x + 200, facesArray[i].y + 250)
+                        , new Scalar(0, 255, 0, 255), 3);
+                rect.setBounds(facesArray[i].x+400,facesArray[i].y+100,200,150);
+                setRectangle(rect);
+            }
+            else {
+                Imgproc.rectangle(mRgbaT, new Point(facesArray[i].x - 50, facesArray[i].y + 100),
+                        new Point(facesArray[i].x - 250, facesArray[i].y + 250),
+                        new Scalar(255, 255, 0, 255), 3);
+                rect.setBounds(facesArray[i].x - 50,facesArray[i].y+100,200,150);
+                setRectangle(rect);
+            }
+
+
         }
         Mat mRgbaT2 = mRgbaT.t();
         Imgproc.resize(mRgbaT2, mRgbaT2, mRgbaT.size());
@@ -307,5 +321,13 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
     public void setRectangle(Rectangle rect){
         this.R1=rect;
+    }
+    public Point Kmeans(MatOfPoint list){
+        Point center=new Point(0,0);
+        for(int i=0;i<list.toList().size();i++){
+            center.set(new double[]{list.toList().get(i).x+center.x, list.toList().get(i).y+center.y});
+        }
+        center.set(new double[]{center.x/list.toList().size(),center.y/list.toList().size()});
+        return center;
     }
 }
