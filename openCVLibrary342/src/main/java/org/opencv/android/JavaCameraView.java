@@ -181,7 +181,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
                     if ((getLayoutParams().width == LayoutParams.MATCH_PARENT) && (getLayoutParams().height == LayoutParams.MATCH_PARENT))
                         // mScale = Math.max(((float)height)/mFrameHeight, ((float)width)/mFrameWidth);
-                        mScale=(float)1.6;
+                        mScale=(float)2.3;
                     else
                         mScale = 0;
 
@@ -301,7 +301,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
     @Override
     public void onPreviewFrame(byte[] frame, Camera arg1) {
         if (BuildConfig.DEBUG)
-            Log.d(TAG, "Preview Frame received. Frame size: " + frame.length);
+            //Log.d(TAG, "Preview Frame received. Frame size: " + frame.length);
         synchronized (this) {
             mFrameChain[mChainIdx].put(0, 0, frame);
             mCameraFrameReady = true;
