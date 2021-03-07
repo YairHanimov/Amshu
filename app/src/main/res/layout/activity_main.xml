@@ -1,13 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<androidx.constraintlayout.widget.ConstraintLayout   xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:opencv="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:screenOrientation="portrait"
+    >
+
     <org.opencv.android.JavaCameraView
+        android:id="@+id/mycamera"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:id="@+id/mycamera"
-        opencv:camera_id="front"/>
+        opencv:camera_id="front"
+        opencv:layout_constraintBottom_toBottomOf="parent"
+        opencv:layout_constraintEnd_toEndOf="parent"
+        opencv:layout_constraintStart_toStartOf="parent"
+        opencv:layout_constraintTop_toTopOf="parent"
+        />
 
-</LinearLayout>
+
+    <ImageButton
+        android:id="@+id/button"
+        android:layout_width="241dp"
+        android:layout_height="236dp"
+        android:layout_marginTop="164dp"
+        android:background="@null"
+        android:src="@drawable/person_image2"
+        android:text="Button"
+        android:alpha="0.55"
+        android:visibility="invisible"
+        android:onClick="image_person_click"
+
+        opencv:layout_constraintEnd_toEndOf="parent"
+        opencv:layout_constraintStart_toStartOf="parent"
+        opencv:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/imageView8"
+        android:layout_width="430dp"
+        android:layout_height="459dp"
+        android:alpha="0.55"
+        android:src="@drawable/ballimage"
+        opencv:layout_constraintBottom_toBottomOf="parent"
+        opencv:layout_constraintEnd_toEndOf="@+id/mycamera"
+        opencv:layout_constraintHorizontal_bias="0.526"
+        opencv:layout_constraintStart_toStartOf="parent"
+        opencv:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

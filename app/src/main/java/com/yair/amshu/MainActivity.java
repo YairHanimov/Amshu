@@ -1,12 +1,15 @@
 package com.yair.amshu;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.hardware.camera2.params.Face;
 import android.media.FaceDetector;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import android.app.Activity;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.MotionEvent;
@@ -14,6 +17,12 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.RatingBar;
 import android.widget.Toast;
 
 import androidx.constraintlayout.solver.widgets.Rectangle;
@@ -51,12 +60,17 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     private Coloralgo ditaction;
     private Size spectorsize;
     private CascadeClassifier cascadeClassifier;
+    public static final String MyPREFERENCES = "MyPrefs" ;
 
     private CameraBridgeViewBase opencvcam;
     Mat mat1;
     private int absoluteFaceSize;
     private Rectangle R1;
     private boolean flag=true;
+    SharedPreferences sharedpreferences;
+    MediaPlayer mp2 ;
+    MediaPlayer mp1;
+
     private BaseLoaderCallback theLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -66,8 +80,8 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
                     initializeOpenCVDependencies();
 
                     Log.i(TAG, "OpenCV loaded successfully");
-                    opencvcam.enableView();
-                    opencvcam.setOnTouchListener(MainActivity.this);
+//                    opencvcam.enableView();
+//                    opencvcam.setOnTouchListener(MainActivity.this);
                 } break;
                 default:
                 {
@@ -86,14 +100,25 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     public void onCreate(Bundle savedInstanceState) {
         Log.i(TAG, "called onCreate");
         super.onCreate(savedInstanceState);
+        sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        setContentView(R.layout.firstscreen);
+        SharedPreferences shared = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
+        String channel = (shared.getString("key", ""));
+        int i = Integer.parseInt(channel);
+        RatingBar simpleRatingBar1 = (RatingBar) findViewById(R.id.ratingBar);
+        simpleRatingBar1.setRating(i);
+         mp2 = MediaPlayer.create(this, R.raw.butten_finger_speach);
+         mp1 = MediaPlayer.create(this, R.raw.speach_press_ball);
 
-        setContentView(R.layout.activity_main);
 
-        opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
-        opencvcam.setVisibility(SurfaceView.VISIBLE);
-        opencvcam.setCvCameraViewListener(this);
+
+        //       setContentView(R.layout.activity_main);
+
+//        opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
+//        opencvcam.setVisibility(SurfaceView.VISIBLE);
+//        opencvcam.setCvCameraViewListener(this);
     }
 
     @Override
@@ -199,6 +224,12 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         //Point aa;
         thergba = inputFrame.rgba();
         if (colorselect) {
+
+
+           afterballt();
+
+
+
             ditaction.process(thergba);
             final List<MatOfPoint> contours = ditaction.getContours();
             Thread thread = new Thread() {
@@ -329,5 +360,87 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         }
         center.set(new double[]{center.x/list.toList().size(),center.y/list.toList().size()});
         return center;
+    }
+
+    public void onRadioButtonClicked(View view) {
+
+        // Is the button now checked?
+        boolean checked = ((RadioButton) view).isChecked();
+
+        // Check which radio button was clicked
+        switch(view.getId()) {
+            case R.id.radioButton1:
+                if (checked)
+                    setContentView(R.layout.activity_main);
+                    opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
+                    opencvcam.setVisibility(SurfaceView.VISIBLE);
+                    opencvcam.setCvCameraViewListener(this);
+                    opencvcam.enableView();
+                    opencvcam.setOnTouchListener(MainActivity.this);
+                ((RadioButton) view).setChecked(false);
+                //MediaPlayer mp = MediaPlayer.create(this, R.raw.speach_press_ball);
+                mp1.start();
+//                ImageButton person_image  = (ImageButton) findViewById(R.id.button);
+//                person_image.setVisibility(View.INVISIBLE);
+                break;
+            case R.id.radioButton2:
+                if (checked)
+                    ((RadioButton) view).setChecked(false);
+                    break;
+            case R.id.radioButton3:
+                if (checked)
+                    ((RadioButton) view).setChecked(false);
+                break;
+        }
+    }
+    public  void  image_person_click(View c){
+        ImageView ballvisbility  = (ImageView) findViewById(R.id.imageView8);
+
+        if (ballvisbility.getVisibility() == View.VISIBLE) {
+            // Its visible
+        } else {
+            ImageButton button = (ImageButton) c;
+            SharedPreferences shared = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
+            String channel = (shared.getString("key", ""));
+            button.setVisibility(View.INVISIBLE);
+            SharedPreferences.Editor editor = sharedpreferences.edit();
+            editor.putString("key", "3");
+            editor.commit();        }
+
+
+    }
+    public void  afterballt(){
+
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                ImageView ballvisbility  = (ImageView) findViewById(R.id.imageView8);
+
+                if (ballvisbility.getVisibility() == View.VISIBLE) {
+                    makevisble();
+                    ballvisbility.setVisibility(View.INVISIBLE);
+                    mp2.start();
+
+
+
+                }
+            }
+        });
+    }
+
+
+    public void makevisble(){
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+
+                ImageButton person_image  = (ImageButton) findViewById(R.id.button);
+                person_image.setVisibility(View.VISIBLE);
+            }
+        });
+
     }
 }
