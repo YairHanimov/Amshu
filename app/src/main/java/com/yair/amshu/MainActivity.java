@@ -47,6 +47,7 @@ import org.opencv.objdetect.CascadeClassifier;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.opencv.core.Core.flip;
@@ -55,13 +56,13 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     private static final String  TAG              = "MainActivity";
 
     private boolean colorselect = false;
-    private Mat thergba, thespectrum;
+    private Mat dst, thespectrum;
     private Scalar ballcolorrgb, ballcolorhsv, counter;
     private Coloralgo ditaction;
     private Size spectorsize;
     private CascadeClassifier cascadeClassifier;
     public static final String MyPREFERENCES = "MyPrefs" ;
-
+    private Mat oldFrame;
     private CameraBridgeViewBase opencvcam;
     Mat mat1;
     private int absoluteFaceSize;
@@ -70,7 +71,12 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     SharedPreferences sharedpreferences;
     MediaPlayer mp2 ;
     MediaPlayer mp1;
-
+    int hitCounter=0;
+    private int y=0;
+    private Rectangle rect1;
+    private boolean hitFlag =true;
+    List<Point> pointsDeque = new ArrayList<Point>();
+    List<Mat> frames=new ArrayList<>();
     private BaseLoaderCallback theLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -149,8 +155,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     }
 
     public void onCameraViewStarted(int width, int height) {
-        thergba = new Mat(height, width, CvType.CV_8UC4);
-        mat1=new Mat(width,height, CvType.CV_8UC4);
+        dst = new Mat();
 
         ditaction = new Coloralgo();
         thespectrum = new Mat();
@@ -158,15 +163,16 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         ballcolorhsv = new Scalar(255);
         spectorsize = new Size(200, 64);
         counter = new Scalar(255,0,0,255);
+
     }
 
     public void onCameraViewStopped() {
-        thergba.release();
+        dst.release();
     }
 
     public boolean onTouch(View v, MotionEvent event) {
-        int cols = thergba.cols();
-        int rows = thergba.rows();
+        int cols = dst.cols();
+        int rows = dst.rows();
 
         int xOffset = (opencvcam.getWidth() - cols) / 2;
         int yOffset = (opencvcam.getHeight() - rows) / 2;
@@ -186,7 +192,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         touchedRect.width = (x+4 < cols) ? x + 4 - touchedRect.x : cols - touchedRect.x;
         touchedRect.height = (y+4 < rows) ? y + 4 - touchedRect.y : rows - touchedRect.y;
 
-        Mat touchedRegionRgba = thergba.submat(touchedRect);
+        Mat touchedRegionRgba = dst.submat(touchedRect);
 
         Mat touchedRegionHsv = new Mat();
         Imgproc.cvtColor(touchedRegionRgba, touchedRegionHsv, Imgproc.COLOR_RGB2HSV_FULL);
@@ -213,103 +219,134 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
         return false; // don't need subsequent touch events
     }
-
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        mat1=thergba;
-        Mat mRgbaT = mat1.t();
-        flip(mat1.t(), mRgbaT, 0);
-        Imgproc.resize(mRgbaT, mRgbaT, mat1.size());
+        int minX=175;
+        int maxX=625;
+        int minY=0;
+        int maxY=600;
 
-        Imgproc.cvtColor(mRgbaT, mRgbaT, Imgproc.COLOR_RGBA2RGB);
-        //Point aa;
-        thergba = inputFrame.rgba();
-        if (colorselect) {
+        Mat rgba=inputFrame.rgba();
 
+        Core.flip(rgba,rgba,0);
+        int cols = rgba.cols(); //800
+        int rows = rgba.rows();//600
+        Mat m=Imgproc.getRotationMatrix2D(new Point(cols/2,rows/2),90,0.75);
+        Imgproc.warpAffine(rgba, dst,m,rgba.size());
+        //Imgproc.resize(dst, dst, dst.size());
+        Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGBA2RGB);
+        //Imgproc.medianBlur(dst,dst,5);
 
-           afterballt();
+        frames.add(inputFrame.rgba());
+        Mat diff=new Mat();
+        if(frames.size()>1) {
+            Core.absdiff(frames.get(0), frames.get(1), diff);
+            Core.flip(diff,diff,0);
+            Imgproc.warpAffine(diff, diff,m,diff.size());
 
+            frames.remove(0);
+            Mat gray = new Mat();
+            Imgproc.cvtColor(diff, gray, Imgproc.COLOR_BGR2GRAY);
+            Imgproc.medianBlur(gray,gray,5);
+            Imgproc.threshold(gray,gray,20,255,Imgproc.THRESH_BINARY);
+            Mat kernel =Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE,new Size(3,3));
+            Imgproc.dilate(gray,gray,kernel);
+            List<MatOfPoint> contours2=new ArrayList<>();
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(gray,contours2,hierarchy,Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+            Imgproc.rectangle(dst,new Point(600,200),new Point(500,100),new Scalar(255,5,255),1);
 
-
-            ditaction.process(thergba);
-            final List<MatOfPoint> contours = ditaction.getContours();
-            Thread thread = new Thread() {
-
-                @Override
-                public void run() {
-                    try {
-                        Point aa=contours.get(0).toList().get(0);
-                        Point center = new Point();
-                        for(MatOfPoint list:contours){
-                            center=Kmeans(list);
-                        }
-//                        Log.i("Creation", "aa"+String.valueOf(R1.x));
-//                        Log.i("Creation", String.valueOf(R1.x-R1.width));
-//                        Log.e(TAG, "Contours count: " + contours.size());
-                        Imgproc.drawMarker(thergba,center,new Scalar(255, 255, 0, 255));
-                        if(center.x<R1.y*8/6 && center.x>(R1.y-R1.height)*8/6 &&
-                                center.y < R1.x*6/8&& center.y > (R1.x-R1.width)*6/8) {
-                            Log.i("Creation","kkkkkkk" + aa);
-                            flag=!flag;
-                        }
-                        }
-                     catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            Imgproc.rectangle(dst,new Point(600,200),new Point(500,200-y),new Scalar(255,5,255),-1);
+            for(MatOfPoint cont:contours2) {
+                Rect aa=Imgproc.boundingRect(cont);
+                if(aa.x> 500 && aa.x<600 &&
+                        aa.y > 100&& aa.y < 200){
+                    if(y<100)
+                        y+=5;
+                    //Imgproc.putText(dst,"aaa",new Point(400,400),3,3,new Scalar(1,1,1));
                 }
-            };
-            thread.start();
+                if (Imgproc.contourArea(cont) > 700) {
+                    //Imgproc.rectangle(dst,new Point(aa.x,aa.y),new Point(aa.x+aa.width,aa.y+aa.height),new Scalar(22,22,44));
+                }
+            }
+        }
 
-            Log.e(TAG, "Contours count: " + contours.size());
-            Imgproc.drawContours(thergba, contours, -1, counter);
 
-            Mat colorLabel = thergba.submat(4, 68, 4, 68);
+
+        if (colorselect) {
+            afterballt();
+
+            ditaction.process(dst);
+            final List<MatOfPoint> contours = ditaction.getContours();
+            Point center = new Point();
+            for(MatOfPoint list:contours){
+                center=Kmeans(list);
+            }
+            Imgproc.drawMarker(dst,center,new Scalar(255, 255, 0, 255));
+            pointsDeque.add(center);
+            if(pointsDeque.size()>=10)
+                pointsDeque.remove(0);
+            for(int i=0;i<pointsDeque.size()-1;i++){
+                if(pointsDeque.get(i).x>0&&pointsDeque.get(i).y>0&&
+                        pointsDeque.get(i+1).x>0&&pointsDeque.get(i+1).y>0)
+                    Imgproc.line(dst,pointsDeque.get(i),pointsDeque.get(i+1),
+                            new Scalar(141,222,23),2);
+            }
+            if(center.x> rect1.x && center.x<rect1.x+rect1.width &&
+                    center.y > rect1.y&& center.y < rect1.y+rect1.height) {
+                hitFlag =!hitFlag;
+                hitCounter++;
+            }
+//            else if(hitFlag &&center.x>400){
+////                hitFlag =!hitFlag;
+////            }else if(!hitFlag &&center.x<400){
+////                hitFlag =!hitFlag;
+////            }
+
+            Imgproc.putText(dst,String.valueOf(hitCounter),new Point(minX,100),
+                    1,3,new Scalar(44,44,44));
+            Imgproc.drawContours(dst, contours, -1, counter);
+
+            Mat colorLabel = dst.submat(4, 68, 4, 68);
             colorLabel.setTo(ballcolorrgb);
 
-            Mat spectrumLabel = thergba.submat(4, 4 + thespectrum.rows(), 70, 70 + thespectrum.cols());
+            Mat spectrumLabel = dst.submat(4, 4 + thespectrum.rows(), 70, 70 + thespectrum.cols());
             thespectrum.copyTo(spectrumLabel);
         }
 
 
 
         MatOfRect faces = new MatOfRect();
+        //absoluteFaceSize=Math.round(rows * 0.2f);
 
         // Use the classifier to detect faces
         if (cascadeClassifier != null) {
-            cascadeClassifier.detectMultiScale(mRgbaT, faces, 1.1, 3, 2,
+            cascadeClassifier.detectMultiScale(dst, faces, 1.1, 3, 2,
                     new Size(absoluteFaceSize, absoluteFaceSize), new Size());
         }
 
-//        Imgproc.rectangle(mRgbaT, new Point(550,  200),
-//                new Point( 350,  300), new Scalar(0, 255, 0, 255), 3);
+//        Imgproc.rectangle(thergba, new Point(minX,  minY),
+//                new Point( maxX,  maxY), new Scalar(0, 255, 0, 255), 2);
         // If there are any faces found, draw a rectangle around it
         Rect[] facesArray = faces.toArray();
         for (int i = 0; i <facesArray.length; i++) {
             Rectangle rect=new Rectangle();
-            if (flag) {
-                Imgproc.rectangle(mRgbaT, new Point(facesArray[i].x + 400, facesArray[i].y + 100),
-                        new Point(facesArray[i].x + 200, facesArray[i].y + 250)
+            if (hitFlag) {
+                Imgproc.rectangle(dst, new Point(facesArray[i].x-100, facesArray[i].y+100),
+                        new Point(facesArray[i].x, facesArray[i].y + 225)
                         , new Scalar(0, 255, 0, 255), 3);
-                rect.setBounds(facesArray[i].x+400,facesArray[i].y+100,200,150);
-                setRectangle(rect);
+                rect.setBounds(facesArray[i].x-100,facesArray[i].y+100,100,125);
+
             }
             else {
-                Imgproc.rectangle(mRgbaT, new Point(facesArray[i].x - 50, facesArray[i].y + 100),
-                        new Point(facesArray[i].x - 250, facesArray[i].y + 250),
-                        new Scalar(255, 255, 0, 255), 3);
-                rect.setBounds(facesArray[i].x - 50,facesArray[i].y+100,200,150);
-                setRectangle(rect);
+                Imgproc.rectangle(dst, new Point(facesArray[i].x+100, facesArray[i].y+100),
+                        new Point(facesArray[i].x + 200, facesArray[i].y + 225)
+                        , new Scalar(0, 0, 0, 255), 3);
+                rect.setBounds(facesArray[i].x+100,facesArray[i].y+100,100,125);
             }
-
+            setRectangle(rect);
 
         }
-        Mat mRgbaT2 = mRgbaT.t();
-        Imgproc.resize(mRgbaT2, mRgbaT2, mRgbaT.size());
-        flip(mRgbaT2,mRgbaT2, 1);
-
-        return mRgbaT2;
-
-
-        // return thergba;
+        return dst;
     }
 
     private Scalar converScalarHsv2Rgba(Scalar hsvColor) {
