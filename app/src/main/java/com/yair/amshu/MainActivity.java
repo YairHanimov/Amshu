@@ -111,7 +111,13 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         setContentView(R.layout.firstscreen);
         SharedPreferences shared = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
         String channel = (shared.getString("key", ""));
-        int i = Integer.parseInt(channel);
+        int i;
+        if (channel != null) {
+           i = Integer.parseInt(channel);
+        }
+        else {
+             i = 0;
+        }
         RatingBar simpleRatingBar1 = (RatingBar) findViewById(R.id.ratingBar);
         simpleRatingBar1.setRating(i);
          mp2 = MediaPlayer.create(this, R.raw.butten_finger_speach);
