@@ -66,14 +66,13 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     private CameraBridgeViewBase opencvcam;
     Mat mat1;
     private int absoluteFaceSize;
-    private Rectangle R1;
+    private Rectangle rect1;
     private boolean flag=true;
     SharedPreferences sharedpreferences;
     MediaPlayer mp2 ;
     MediaPlayer mp1;
     int hitCounter=0;
     private int y=0;
-    private Rectangle rect1;
     private boolean hitFlag =true;
     List<Point> pointsDeque = new ArrayList<Point>();
     List<Mat> frames=new ArrayList<>();
@@ -388,7 +387,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     }
 
     public void setRectangle(Rectangle rect){
-        this.R1=rect;
+        this.rect1=rect;
     }
     public Point Kmeans(MatOfPoint list){
         Point center=new Point(0,0);
