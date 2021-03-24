@@ -109,19 +109,29 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.firstscreen);
-        SharedPreferences shared = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
-        String channel = (shared.getString("key", ""));
-        int i;
-        if (channel != null) {
-           i = Integer.parseInt(channel);
+        try {
+            SharedPreferences shared = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
+            String channel = (shared.getString("key", ""));
+            int i;
+            if (channel != null) {
+                i = Integer.parseInt(channel);
+            } else {
+                i = 0;
+            }
+            RatingBar simpleRatingBar1 = (RatingBar) findViewById(R.id.ratingBar);
+            simpleRatingBar1.setRating(i);
+            mp2 = MediaPlayer.create(this, R.raw.butten_finger_speach);
+            mp1 = MediaPlayer.create(this, R.raw.speach_press_ball);
         }
-        else {
-             i = 0;
+        catch ( Exception e){
+           int i = 0;
+            RatingBar simpleRatingBar1 = (RatingBar) findViewById(R.id.ratingBar);
+            simpleRatingBar1.setRating(i);
+            mp2 = MediaPlayer.create(this, R.raw.butten_finger_speach);
+            mp1 = MediaPlayer.create(this, R.raw.speach_press_ball);
+            setContentView(R.layout.loadpage);
         }
-        RatingBar simpleRatingBar1 = (RatingBar) findViewById(R.id.ratingBar);
-        simpleRatingBar1.setRating(i);
-         mp2 = MediaPlayer.create(this, R.raw.butten_finger_speach);
-         mp1 = MediaPlayer.create(this, R.raw.speach_press_ball);
+
 
 
 
@@ -351,6 +361,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
             setRectangle(rect);
 
         }
+        Imgproc.rectangle(dst,new Point(180,0),new Point(540,475),new Scalar(255,32,22));
         return dst;
     }
 
@@ -484,5 +495,19 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
             }
         });
 
+    }
+    public void go_to_start(View v ){
+        setContentView(R.layout.firstscreen);
+        SharedPreferences shared = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
+        String channel = (shared.getString("key", ""));
+        int i;
+        if (channel != null) {
+            i = Integer.parseInt(channel);
+        }
+        else {
+            i = 0;
+        }
+        RatingBar simpleRatingBar1 = (RatingBar) findViewById(R.id.ratingBar);
+        simpleRatingBar1.setRating(i);
     }
 }
