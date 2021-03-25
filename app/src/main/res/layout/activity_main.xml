@@ -21,7 +21,7 @@
         opencv:layout_constraintVertical_bias="1.0" />
 
     <ImageButton
-        android:id="@+id/button"
+        android:id="@+id/button_person"
         android:layout_width="241dp"
         android:layout_height="236dp"
         android:layout_marginTop="164dp"
@@ -71,4 +71,15 @@
         android:onClick="show_vid_one"
         opencv:layout_constraintBottom_toBottomOf="parent"
         opencv:layout_constraintEnd_toEndOf="parent" />
+
+    <VideoView
+        android:id="@+id/videoView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+
+        opencv:layout_constraintBottom_toBottomOf="parent"
+        opencv:layout_constraintEnd_toEndOf="@+id/mycamera"
+        opencv:layout_constraintStart_toStartOf="@+id/mycamera"
+        opencv:layout_constraintTop_toTopOf="@+id/mycamera" />
 </androidx.constraintlayout.widget.ConstraintLayout>

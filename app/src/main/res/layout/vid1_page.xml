@@ -13,7 +13,7 @@
     </VideoView>
 
     <ImageButton
-        android:id="@+id/button3"
+        android:id="@+id/button33"
         android:layout_width="139dp"
         android:layout_height="90dp"
         android:background="@null"

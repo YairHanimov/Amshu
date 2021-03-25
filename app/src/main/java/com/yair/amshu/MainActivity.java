@@ -23,6 +23,7 @@ import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -87,8 +88,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
                     initializeOpenCVDependencies();
 
                     Log.i(TAG, "OpenCV loaded successfully");
-//                    opencvcam.enableView();
-//                    opencvcam.setOnTouchListener(MainActivity.this);
+
                 } break;
                 default:
                 {
@@ -137,11 +137,9 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
 
 
-        //       setContentView(R.layout.activity_main);
 
-//        opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
-//        opencvcam.setVisibility(SurfaceView.VISIBLE);
-//        opencvcam.setCvCameraViewListener(this);
+        setContentView(R.layout.firstscreen);
+
     }
 
     @Override
@@ -493,7 +491,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
             @Override
             public void run() {
 
-                ImageButton person_image  = (ImageButton) findViewById(R.id.button);
+                ImageButton person_image  = (ImageButton) findViewById(R.id.button_person);
                 person_image.setVisibility(View.VISIBLE);
             }
         });
@@ -531,21 +529,26 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
         if (lag_crash!= 0 ){
             setContentView(R.layout.activity_main);
+            onResume();
             opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
             opencvcam.setVisibility(SurfaceView.VISIBLE);
             opencvcam.setCvCameraViewListener(this);
-
             opencvcam.enableView();
+            opencvcam.setOnTouchListener(MainActivity.this);
 
 
         }
-                   if (lag_crash ==0) {
-                       setContentView(R.layout.activity_main);
-                       opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
-                       opencvcam.setVisibility(SurfaceView.VISIBLE);
-                       opencvcam.setCvCameraViewListener(this);
+        if (lag_crash ==0) {
+            setContentView(R.layout.activity_main);
+            onResume();
+            setContentView(R.layout.activity_main);
+
+            opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
+            opencvcam.setVisibility(SurfaceView.VISIBLE);
+            opencvcam.setCvCameraViewListener(this);
                        opencvcam.enableView();
                        opencvcam.setOnTouchListener(MainActivity.this);
+
                        mp1.start();
                        lag_crash++;
                    }
@@ -558,25 +561,38 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     }
 
     public void exit_from_view(View view) {
-        setContentView(R.layout.firstscreen);
+      //  setContentView(R.layout.firstscreen);
         mp1.stop();
         mp2.stop();
+        recreate();
+
+
 
     }
 
     public void show_vid_one(View view) {
-        setContentView(R.layout.vid1_page);
-        VideoView videoView = (VideoView)findViewById(R.id.videoView);
-        videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.test);
-        videoView.start();
-        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+
+
+                findViewById(R.id.videoView2).setVisibility(View.VISIBLE);
+                VideoView videoView = (VideoView)findViewById(R.id.videoView2);
+                videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.test);
+                 videoView.start();
+                 videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
             @Override
             public void onCompletion(MediaPlayer mp) {
-                setContentView(R.layout.loadpage);
+                findViewById(R.id.videoView2).setVisibility(View.INVISIBLE);
+
+
             }
         });
 
+            }
+        });
     }
 
     public void back_to_menu(View view) {
