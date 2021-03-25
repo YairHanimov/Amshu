@@ -24,6 +24,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
 import android.widget.Toast;
+import android.widget.VideoView;
 
 import androidx.constraintlayout.solver.widgets.Rectangle;
 
@@ -424,17 +425,18 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         switch(view.getId()) {
             case R.id.radioButton1:
                 if (checked)
-                    setContentView(R.layout.activity_main);
-                    opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
-                    opencvcam.setVisibility(SurfaceView.VISIBLE);
-                    opencvcam.setCvCameraViewListener(this);
-                    opencvcam.enableView();
-                    opencvcam.setOnTouchListener(MainActivity.this);
+                    setContentView(R.layout.loadpage);
+
+//                    setContentView(R.layout.activity_main);
+//                    opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
+//                    opencvcam.setVisibility(SurfaceView.VISIBLE);
+//                    opencvcam.setCvCameraViewListener(this);
+//                    opencvcam.enableView();
+//                    opencvcam.setOnTouchListener(MainActivity.this);
+                //                mp1.start();
+
                 ((RadioButton) view).setChecked(false);
-                //MediaPlayer mp = MediaPlayer.create(this, R.raw.speach_press_ball);
-                mp1.start();
-//                ImageButton person_image  = (ImageButton) findViewById(R.id.button);
-//                person_image.setVisibility(View.INVISIBLE);
+
                 break;
             case R.id.radioButton2:
                 if (checked)
@@ -496,18 +498,39 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         });
 
     }
-    public void go_to_start(View v ){
-        setContentView(R.layout.firstscreen);
-        SharedPreferences shared = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
-        String channel = (shared.getString("key", ""));
-        int i;
-        if (channel != null) {
-            i = Integer.parseInt(channel);
-        }
-        else {
-            i = 0;
-        }
-        RatingBar simpleRatingBar1 = (RatingBar) findViewById(R.id.ratingBar);
-        simpleRatingBar1.setRating(i);
+
+    public void vid_exm(View v){
+        setContentView(R.layout.vid1_page;
+        VideoView videoView = (VideoView)findViewById(R.id.videoView);
+        videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.vid_exm);
+        videoView.start();
     }
+    public void go_to_start(View v ){
+//        setContentView(R.layout.firstscreen);
+//        SharedPreferences shared = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
+//        String channel = (shared.getString("key", ""));
+//        int i;
+//        if (channel != null) {
+//            i = Integer.parseInt(channel);
+//        }
+//        else {
+//            i = 0;
+//        }
+//        RatingBar simpleRatingBar1 = (RatingBar) findViewById(R.id.ratingBar);
+//        simpleRatingBar1.setRating(i);
+
+
+
+
+
+                            setContentView(R.layout.activity_main);
+                    opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
+                    opencvcam.setVisibility(SurfaceView.VISIBLE);
+                    opencvcam.setCvCameraViewListener(this);
+                    opencvcam.enableView();
+                    opencvcam.setOnTouchListener(MainActivity.this);
+                       mp1.start();
+
+    }
+
 }
