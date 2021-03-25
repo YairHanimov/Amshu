@@ -306,11 +306,11 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
                     Imgproc.line(dst,pointsDeque.get(i),pointsDeque.get(i+1),
                             new Scalar(141,222,23),2);
             }
-            if(center.x> rect1.x && center.x<rect1.x+rect1.width &&
-                    center.y > rect1.y&& center.y < rect1.y+rect1.height) {
-                hitFlag =!hitFlag;
-                hitCounter++;
-            }
+//            if(center.x> rect1.x && center.x<rect1.x+rect1.width &&
+//                    center.y > rect1.y&& center.y < rect1.y+rect1.height) {
+//                hitFlag =!hitFlag;
+//                hitCounter++;
+//            }
 //            else if(hitFlag &&center.x>400){
 ////                hitFlag =!hitFlag;
 ////            }else if(!hitFlag &&center.x<400){
