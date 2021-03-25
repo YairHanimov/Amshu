@@ -7,6 +7,7 @@
     android:screenOrientation="portrait"
     >
 
+
     <org.opencv.android.JavaCameraView
         android:id="@+id/mycamera"
         android:layout_width="fill_parent"
@@ -14,10 +15,10 @@
         opencv:camera_id="front"
         opencv:layout_constraintBottom_toBottomOf="parent"
         opencv:layout_constraintEnd_toEndOf="parent"
+        opencv:layout_constraintHorizontal_bias="1.0"
         opencv:layout_constraintStart_toStartOf="parent"
         opencv:layout_constraintTop_toTopOf="parent"
-        />
-
+        opencv:layout_constraintVertical_bias="1.0" />
 
     <ImageButton
         android:id="@+id/button"
@@ -47,4 +48,27 @@
         opencv:layout_constraintStart_toStartOf="parent"
         opencv:layout_constraintTop_toTopOf="parent" />
 
+    <ImageButton
+        android:id="@+id/button_exit"
+        android:layout_width="139dp"
+        android:layout_height="90dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginBottom="16dp"
+
+        android:background="@null"
+        android:onClick="exit_from_view"
+        android:src="@drawable/expic"
+        android:text="Button"
+        opencv:layout_constraintBottom_toBottomOf="parent"
+        opencv:layout_constraintStart_toStartOf="parent" />
+
+    <ImageButton
+        android:id="@+id/qmark"
+        android:layout_width="123dp"
+        android:layout_height="128dp"
+        android:background="@null"
+        android:src="@drawable/qmark"
+        android:onClick="show_vid_one"
+        opencv:layout_constraintBottom_toBottomOf="parent"
+        opencv:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

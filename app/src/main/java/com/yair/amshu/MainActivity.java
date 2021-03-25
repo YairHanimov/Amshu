@@ -74,6 +74,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     MediaPlayer mp1;
     int hitCounter=0;
     private int y=0;
+    int lag_crash=0;
     private boolean hitFlag =true;
     List<Point> pointsDeque = new ArrayList<Point>();
     List<Mat> frames=new ArrayList<>();
@@ -502,8 +503,15 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     public void vid_exm(View v){
         setContentView(R.layout.vid1_page);
         VideoView videoView = (VideoView)findViewById(R.id.videoView);
-        videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.vid_exm);
+        videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.test);
         videoView.start();
+        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                setContentView(R.layout.loadpage);
+            }
+        });
     }
     public void go_to_start(View v ){
 //        setContentView(R.layout.firstscreen);
@@ -521,16 +529,58 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
 
 
+        if (lag_crash!= 0 ){
+            setContentView(R.layout.activity_main);
+            opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
+            opencvcam.setVisibility(SurfaceView.VISIBLE);
+            opencvcam.setCvCameraViewListener(this);
+
+            opencvcam.enableView();
 
 
-                            setContentView(R.layout.activity_main);
-                    opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
-                    opencvcam.setVisibility(SurfaceView.VISIBLE);
-                    opencvcam.setCvCameraViewListener(this);
-                    opencvcam.enableView();
-                    opencvcam.setOnTouchListener(MainActivity.this);
+        }
+                   if (lag_crash ==0) {
+                       setContentView(R.layout.activity_main);
+                       opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
+                       opencvcam.setVisibility(SurfaceView.VISIBLE);
+                       opencvcam.setCvCameraViewListener(this);
+                       opencvcam.enableView();
+                       opencvcam.setOnTouchListener(MainActivity.this);
                        mp1.start();
+                       lag_crash++;
+                   }
+
+
+    }
+    public  void  exit_from_vid_1 (View v){
+        setContentView(R.layout.loadpage);
 
     }
 
+    public void exit_from_view(View view) {
+        setContentView(R.layout.firstscreen);
+        mp1.stop();
+        mp2.stop();
+
+    }
+
+    public void show_vid_one(View view) {
+        setContentView(R.layout.vid1_page);
+        VideoView videoView = (VideoView)findViewById(R.id.videoView);
+        videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.test);
+        videoView.start();
+        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                setContentView(R.layout.loadpage);
+            }
+        });
+
+    }
+
+    public void back_to_menu(View view) {
+        setContentView(R.layout.firstscreen);
+
+    }
 }

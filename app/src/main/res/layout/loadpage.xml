@@ -43,6 +43,9 @@
         android:layout_width="197dp"
         android:layout_height="173dp"
         android:text="Button"
+        android:src="@drawable/bmenu"
+        android:onClick="back_to_menu"
+
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
