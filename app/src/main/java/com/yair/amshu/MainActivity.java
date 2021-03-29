@@ -240,66 +240,31 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         touchedRegionHsv.release();
     }
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        int minX=175;
-        int maxX=625;
-        int minY=0;
-        int maxY=600;
 
+        //set the input frame from camera to display on smartphone screen
         Mat rgba=inputFrame.rgba();
-
         Core.flip(rgba,rgba,0);
         int cols = rgba.cols(); //800
         int rows = rgba.rows();//600
         Mat m=Imgproc.getRotationMatrix2D(new Point(cols/2,rows/2),90,0.75);
         Imgproc.warpAffine(rgba, dst,m,rgba.size());
-        //Imgproc.resize(dst, dst, dst.size());
         Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGBA2RGB);
-        //Imgproc.medianBlur(dst,dst,5);
-
-        frames.add(inputFrame.rgba());
-        Mat diff=new Mat();
-        if(frames.size()>1) {
-            Core.absdiff(frames.get(0), frames.get(1), diff);
-            Core.flip(diff,diff,0);
-            Imgproc.warpAffine(diff, diff,m,diff.size());
-
-            frames.remove(0);
-            Mat gray = new Mat();
-            Imgproc.cvtColor(diff, gray, Imgproc.COLOR_BGR2GRAY);
-            Imgproc.medianBlur(gray,gray,5);
-            Imgproc.threshold(gray,gray,20,255,Imgproc.THRESH_BINARY);
-            Mat kernel =Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE,new Size(3,3));
-            Imgproc.dilate(gray,gray,kernel);
-            List<MatOfPoint> contours2=new ArrayList<>();
-            Mat hierarchy = new Mat();
-            Imgproc.findContours(gray,contours2,hierarchy,Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-            Imgproc.rectangle(dst,new Point(600,200),new Point(500,100),new Scalar(255,5,255),1);
-
-            Imgproc.rectangle(dst,new Point(600,200),new Point(500,200-y),new Scalar(255,5,255),-1);
-            for(MatOfPoint cont:contours2) {
-                Rect aa=Imgproc.boundingRect(cont);
-                if(aa.x> 500 && aa.x<600 &&
-                        aa.y > 100&& aa.y < 200){
-                    if(y<100)
-                        y+=5;
-                    //Imgproc.putText(dst,"aaa",new Point(400,400),3,3,new Scalar(1,1,1));
-                }
-                if (Imgproc.contourArea(cont) > 700) {
-                    //Imgproc.rectangle(dst,new Point(aa.x,aa.y),new Point(aa.x+aa.width,aa.y+aa.height),new Scalar(22,22,44));
-                }
-            }
+        //Imgproc.medianBlur(dst,dst,3);
+        Imgproc.drawMarker(dst,new Point(dst.cols()*3/4,dst.rows()/4),new Scalar(255, 255, 0, 255));
+        if(!colorselect) {
         }
-
-
-
-        if (colorselect&& rect1!=null) {
+        else {
             afterballt();
-
             ditaction.process(dst);
             final List<MatOfPoint> contours = ditaction.getContours();
             Point center = new Point();
             for(MatOfPoint list:contours){
-                center=Kmeans(list);
+                if (contours.toArray().length==1) {
+                    center = Kmeans(list);
+                }
+                else {
+                    Imgproc.putText(dst,"only 1 ball allow",new Point(dst.cols()/2,dst.rows()/2),1,2,new Scalar(0,0,0));
+                }
             }
             Imgproc.drawMarker(dst,center,new Scalar(255, 255, 0, 255));
             pointsDeque.add(center);
@@ -311,66 +276,59 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
                     Imgproc.line(dst,pointsDeque.get(i),pointsDeque.get(i+1),
                             new Scalar(141,222,23),2);
             }
+            List<MatOfPoint> contours2=movementDetection(dst,m);
+            for(MatOfPoint cont:contours2) {
+                Rect aa=Imgproc.boundingRect(cont);
+                if(aa.x> rect1.x && aa.x<rect1.x+rect1.width &&
+                        aa.y > rect1.y&& aa.y < rect1.y+rect1.height){
+                    hitFlag =!hitFlag;
+                    hitCounter++;
+                }
+            }
+
+            TextView score   = (TextView) findViewById(R.id.score_counter_xml);
+
+            score.setText(String.valueOf(hitCounter));
             if(center.x> rect1.x && center.x<rect1.x+rect1.width &&
                     center.y > rect1.y&& center.y < rect1.y+rect1.height) {
                 hitFlag =!hitFlag;
                 hitCounter++;
             }
-            else if(hitFlag &&center.x>400){
-                hitFlag =!hitFlag;
-            }else if(!hitFlag &&center.x<400){
-                hitFlag =!hitFlag;
-            }
-
-
-            TextView score   = (TextView) findViewById(R.id.score_counter_xml);
-
-            score.setText(String.valueOf(hitCounter));
             Imgproc.drawContours(dst, contours, -1, counter);
-
             Mat colorLabel = dst.submat(4, 68, 4, 68);
             colorLabel.setTo(ballcolorrgb);
-
             Mat spectrumLabel = dst.submat(4, 4 + thespectrum.rows(), 70, 70 + thespectrum.cols());
             thespectrum.copyTo(spectrumLabel);
         }
-
-
-
         MatOfRect faces = new MatOfRect();
-        //absoluteFaceSize=Math.round(rows * 0.2f);
 
-        // Use the classifier to detect faces
         if (cascadeClassifier != null) {
             cascadeClassifier.detectMultiScale(dst, faces, 1.1, 3, 2,
                     new Size(absoluteFaceSize, absoluteFaceSize), new Size());
         }
-
-//        Imgproc.rectangle(thergba, new Point(minX,  minY),
-//                new Point( maxX,  maxY), new Scalar(0, 255, 0, 255), 2);
-        // If there are any faces found, draw a rectangle around it
         Rect[] facesArray = faces.toArray();
         for (int i = 0; i <facesArray.length; i++) {
-            Rectangle rect=new Rectangle();
-            if (hitFlag) {
-                Imgproc.rectangle(dst, new Point(facesArray[i].x-100, facesArray[i].y+100),
-                        new Point(facesArray[i].x, facesArray[i].y + 225)
-                        , new Scalar(0, 255, 0, 255), 3);
-                rect.setBounds(facesArray[i].x-100,facesArray[i].y+100,100,125);
-
+            if(facesArray.length!=1){
+                Imgproc.putText(dst,"only 1 person allow",new Point(dst.rows()/2,dst.rows()/2),1,2,new Scalar(0,0,0));
+                break;
             }
-            else {
-                Imgproc.rectangle(dst, new Point(facesArray[i].x+100, facesArray[i].y+100),
-                        new Point(facesArray[i].x + 200, facesArray[i].y + 225)
-                        , new Scalar(0, 0, 0, 255), 3);
-                rect.setBounds(facesArray[i].x+100,facesArray[i].y+100,100,125);
+            Rectangle rect=new Rectangle();
+            if(hitFlag) {
+                Imgproc.rectangle(dst, new Point(facesArray[i].x - facesArray[i].width *2/ 3, facesArray[i].y),
+                        new Point(facesArray[i].x, facesArray[i].y + facesArray[i].height*2/3)
+                        , new Scalar(0, 255, 0, 255), 3);
+                rect.setBounds(facesArray[i].x - facesArray[i].width*2/ 3, facesArray[i].y, facesArray[i].width*2 / 3, facesArray[i].height*2 / 3);
+            }else{
+                Imgproc.rectangle(dst, new Point(facesArray[i].x + facesArray[i].width, facesArray[i].y),
+                        new Point(facesArray[i].x+facesArray[i].width+facesArray[i].width*2 / 3, facesArray[i].y + facesArray[i].height*2/3)
+                        , new Scalar(0, 255, 0, 255), 3);
+                rect.setBounds(facesArray[i].x + facesArray[i].width, facesArray[i].y , facesArray[i].width*2 / 3, facesArray[i].height*2 / 3);
             }
             setRectangle(rect);
-
         }
-        Imgproc.rectangle(dst,new Point(180,0),new Point(540,475),new Scalar(255,32,22));
         return dst;
     }
+
 
     private Scalar converScalarHsv2Rgba(Scalar hsvColor) {
         Mat pointMatRgba = new Mat();
@@ -406,8 +364,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
             Log.e("OpenCVActivity", "Error loading cascade", e);
         }
 
-        // And we are ready to go
-        //   cameraBridgeViewBase.enableView();
+
     }
 
     public void setRectangle(Rectangle rect){
@@ -424,22 +381,14 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
     public void onRadioButtonClicked(View view) {
 
-        // Is the button now checked?
         boolean checked = ((RadioButton) view).isChecked();
 
-        // Check which radio button was clicked
         switch(view.getId()) {
             case R.id.radioButton1:
                 if (checked)
                     setContentView(R.layout.loadpage);
 
-//                    setContentView(R.layout.activity_main);
-//                    opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
-//                    opencvcam.setVisibility(SurfaceView.VISIBLE);
-//                    opencvcam.setCvCameraViewListener(this);
-//                    opencvcam.enableView();
-//                    opencvcam.setOnTouchListener(MainActivity.this);
-                //                mp1.start();
+
 
                 ((RadioButton) view).setChecked(false);
 
@@ -454,6 +403,32 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
                 break;
         }
     }
+
+
+
+
+
+    public List<MatOfPoint> movementDetection(Mat Frame,Mat m){
+        List<MatOfPoint> contours = new ArrayList<>();
+        frames.add(Frame);
+        Mat diff=new Mat();
+        if(frames.size()>1) {
+            Core.absdiff(frames.get(0), frames.get(1), diff);
+            Core.flip(diff, diff, 0);
+            Imgproc.warpAffine(diff, diff, m, diff.size());
+            frames.remove(0);
+            Mat gray = new Mat();
+            Imgproc.cvtColor(diff, gray, Imgproc.COLOR_BGR2GRAY);
+            Imgproc.medianBlur(gray, gray, 5);
+            Imgproc.threshold(gray, gray, 20, 255, Imgproc.THRESH_BINARY);
+            Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+            Imgproc.dilate(gray, gray, kernel);
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(gray, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        }
+        return contours;
+    }
+
     public  void  image_person_click(View c){
         ImageView ballvisbility  = (ImageView) findViewById(R.id.imageView8);
 
@@ -523,20 +498,6 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         });
     }
     public void go_to_start(View v ){
-//        setContentView(R.layout.firstscreen);
-//        SharedPreferences shared = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
-//        String channel = (shared.getString("key", ""));
-//        int i;
-//        if (channel != null) {
-//            i = Integer.parseInt(channel);
-//        }
-//        else {
-//            i = 0;
-//        }
-//        RatingBar simpleRatingBar1 = (RatingBar) findViewById(R.id.ratingBar);
-//        simpleRatingBar1.setRating(i);
-
-
 
         if (lag_crash!= 0 ){
             setContentView(R.layout.activity_main);
@@ -572,7 +533,6 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     }
 
     public void exit_from_view(View view) {
-      //  setContentView(R.layout.firstscreen);
         mp1.stop();
         mp2.stop();
         recreate();
