@@ -9,6 +9,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import android.app.Activity;
+import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
@@ -24,6 +25,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -290,7 +292,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
 
 
-        if (colorselect) {
+        if (colorselect&& rect1!=null) {
             afterballt();
 
             ditaction.process(dst);
@@ -309,19 +311,21 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
                     Imgproc.line(dst,pointsDeque.get(i),pointsDeque.get(i+1),
                             new Scalar(141,222,23),2);
             }
-//            if(center.x> rect1.x && center.x<rect1.x+rect1.width &&
-//                    center.y > rect1.y&& center.y < rect1.y+rect1.height) {
-//                hitFlag =!hitFlag;
-//                hitCounter++;
-//            }
-//            else if(hitFlag &&center.x>400){
-////                hitFlag =!hitFlag;
-////            }else if(!hitFlag &&center.x<400){
-////                hitFlag =!hitFlag;
-////            }
+            if(center.x> rect1.x && center.x<rect1.x+rect1.width &&
+                    center.y > rect1.y&& center.y < rect1.y+rect1.height) {
+                hitFlag =!hitFlag;
+                hitCounter++;
+            }
+            else if(hitFlag &&center.x>400){
+                hitFlag =!hitFlag;
+            }else if(!hitFlag &&center.x<400){
+                hitFlag =!hitFlag;
+            }
 
-            Imgproc.putText(dst,String.valueOf(hitCounter),new Point(minX,100),
-                    1,3,new Scalar(44,44,44));
+
+            TextView score   = (TextView) findViewById(R.id.score_counter_xml);
+
+            score.setText(String.valueOf(hitCounter));
             Imgproc.drawContours(dst, contours, -1, counter);
 
             Mat colorLabel = dst.submat(4, 68, 4, 68);
@@ -463,6 +467,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
             SharedPreferences.Editor editor = sharedpreferences.edit();
             editor.putString("key", "3");
             editor.commit();        }
+
 
 
     }
@@ -608,6 +613,34 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
     public void scan_btn(View view) {
          setBallColor();
+         view.setVisibility(View.INVISIBLE);
+        ImageButton person_image  = (ImageButton) findViewById(R.id.button_person);
+        person_image.setVisibility(View.VISIBLE);
+        TextView timer_xml   = (TextView) findViewById(R.id.timer_time);
+        ImageView ball  = (ImageView) findViewById(R.id.imageView8);
+        ball.setVisibility(View.INVISIBLE);
+
+        person_image.setVisibility(View.VISIBLE);
+        timer_xml.setText(String.valueOf(5));
+        timer_xml.setVisibility(View.VISIBLE);
+
+        new CountDownTimer(5000, 1000) {
+
+            TextView timer_xml   = (TextView) findViewById(R.id.timer_time);
+
+            public void onTick(long millisUntilFinished) {
+                timer_xml.setText(String.valueOf((int)(millisUntilFinished / 1000)));
+            }
+
+            public void onFinish() {
+                ImageButton person_image  = (ImageButton) findViewById(R.id.button_person);
+
+                timer_xml.setVisibility(View.INVISIBLE);
+                person_image.setVisibility(View.INVISIBLE);
+
+            }
+
+        }.start();
 
     }
 }

@@ -30,7 +30,7 @@
         android:onClick="image_person_click"
         android:src="@drawable/person_image2"
         android:text="Button"
-        android:visibility="visible"
+        android:visibility="invisible"
 
         opencv:layout_constraintEnd_toEndOf="parent"
         opencv:layout_constraintStart_toStartOf="parent"
@@ -118,8 +118,25 @@
         android:layout_marginTop="16dp"
         android:textSize="30dp"
         android:textColor="#7FFF00"
-        android:text="TextView"
+        android:text="0"
         opencv:layout_constraintStart_toEndOf="@+id/textView"
         opencv:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/timer_time"
+        android:layout_width="166dp"
+        android:layout_height="176dp"
+        android:layout_marginTop="380dp"
+        android:text="3"
+        android:textColor="#7FFF00"
+        android:visibility="invisible"
+
+        android:textSize="150dp"
+        opencv:layout_constraintBottom_toBottomOf="parent"
+        opencv:layout_constraintEnd_toEndOf="parent"
+        opencv:layout_constraintHorizontal_bias="0.636"
+        opencv:layout_constraintStart_toStartOf="parent"
+        opencv:layout_constraintTop_toBottomOf="@+id/score_counter_xml"
+        opencv:layout_constraintVertical_bias="0.058" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
