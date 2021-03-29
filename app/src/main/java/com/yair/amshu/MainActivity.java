@@ -186,18 +186,23 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     }
 
     public boolean onTouch(View v, MotionEvent event) {
+
+
+        return false; // don't need subsequent touch events
+    }
+    public void setBallColor(){
         int cols = dst.cols();
         int rows = dst.rows();
 
         int xOffset = (opencvcam.getWidth() - cols) / 2;
         int yOffset = (opencvcam.getHeight() - rows) / 2;
 
-        int x = (int)event.getX() - xOffset;
-        int y = (int)event.getY() - yOffset;
+        int x = cols/2;
+        int y = rows/2;
 
         Log.i(TAG, "Touch image coordinates: (" + x + ", " + y + ")");
 
-        if ((x < 0) || (y < 0) || (x > cols) || (y > rows)) return false;
+        if ((x < 0) || (y < 0) || (x > cols) || (y > rows)) return;
 
         Rect touchedRect = new Rect();
 
@@ -231,70 +236,82 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
         touchedRegionRgba.release();
         touchedRegionHsv.release();
-
-        return false; // don't need subsequent touch events
     }
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
-        int minX=175;
-        int maxX=625;
-        int minY=0;
-        int maxY=600;
-
-        Mat rgba=inputFrame.rgba();
-
-        Core.flip(rgba,rgba,0);
-        int cols = rgba.cols(); //800
-        int rows = rgba.rows();//600
-        Mat m=Imgproc.getRotationMatrix2D(new Point(cols/2,rows/2),90,0.75);
-        Imgproc.warpAffine(rgba, dst,m,rgba.size());
-        //Imgproc.resize(dst, dst, dst.size());
-        Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGBA2RGB);
-        //Imgproc.medianBlur(dst,dst,5);
-
-        frames.add(inputFrame.rgba());
+    public List<MatOfPoint> movementDetection(Mat Frame,Mat m){
+        //Movement detection using 2 last frames
+        List<MatOfPoint> contours = new ArrayList<>();
+        frames.add(Frame);
         Mat diff=new Mat();
         if(frames.size()>1) {
             Core.absdiff(frames.get(0), frames.get(1), diff);
-            Core.flip(diff,diff,0);
-            Imgproc.warpAffine(diff, diff,m,diff.size());
+            Core.flip(diff, diff, 0);
+            Imgproc.warpAffine(diff, diff, m, diff.size());
 
             frames.remove(0);
             Mat gray = new Mat();
             Imgproc.cvtColor(diff, gray, Imgproc.COLOR_BGR2GRAY);
-            Imgproc.medianBlur(gray,gray,5);
-            Imgproc.threshold(gray,gray,20,255,Imgproc.THRESH_BINARY);
-            Mat kernel =Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE,new Size(3,3));
-            Imgproc.dilate(gray,gray,kernel);
-            List<MatOfPoint> contours2=new ArrayList<>();
-            Mat hierarchy = new Mat();
-            Imgproc.findContours(gray,contours2,hierarchy,Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-            Imgproc.rectangle(dst,new Point(600,200),new Point(500,100),new Scalar(255,5,255),1);
+            Imgproc.medianBlur(gray, gray, 5);
+            Imgproc.threshold(gray, gray, 20, 255, Imgproc.THRESH_BINARY);
+            Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+            Imgproc.dilate(gray, gray, kernel);
 
+            Mat hierarchy = new Mat();
+            Imgproc.findContours(gray, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        }
+        return contours;
+    }
+    public void movementButton(List<MatOfPoint> contours){
+
+            //draw the button rectangle on screen
+            Imgproc.rectangle(dst,new Point(600,200),new Point(500,100),new Scalar(255,5,255),1);
             Imgproc.rectangle(dst,new Point(600,200),new Point(500,200-y),new Scalar(255,5,255),-1);
-            for(MatOfPoint cont:contours2) {
+            //get movement point on screen
+            for(MatOfPoint cont:contours) {
                 Rect aa=Imgproc.boundingRect(cont);
+                //detect the movement inside the button
                 if(aa.x> 500 && aa.x<600 &&
                         aa.y > 100&& aa.y < 200){
                     if(y<100)
                         y+=5;
-                    //Imgproc.putText(dst,"aaa",new Point(400,400),3,3,new Scalar(1,1,1));
+                    else if (y==100){
+                        setBallColor();
+                    }
+                }
+                else if(y>0){
+                    y-=1;
                 }
                 if (Imgproc.contourArea(cont) > 700) {
                     //Imgproc.rectangle(dst,new Point(aa.x,aa.y),new Point(aa.x+aa.width,aa.y+aa.height),new Scalar(22,22,44));
                 }
             }
+    }
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+
+        //set the input frame from camera to display on smartphone screen
+        Mat rgba=inputFrame.rgba();
+        Core.flip(rgba,rgba,0);
+        int cols = rgba.cols(); //800
+        int rows = rgba.rows();//600
+        Mat m=Imgproc.getRotationMatrix2D(new Point(cols/2,rows/2),90,0.75);
+        Imgproc.warpAffine(rgba, dst,m,rgba.size());
+        Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGBA2RGB);
+        //Imgproc.medianBlur(dst,dst,3);
+
+        if(!colorselect) {
+            movementButton(movementDetection(inputFrame.rgba(), m));
         }
-
-
-
-        if (colorselect) {
+        else {
             afterballt();
-
             ditaction.process(dst);
             final List<MatOfPoint> contours = ditaction.getContours();
             Point center = new Point();
             for(MatOfPoint list:contours){
-                center=Kmeans(list);
+                if (contours.toArray().length==1) {
+                    center = Kmeans(list);
+                }
+                else {
+                    Imgproc.putText(dst,"only 1 ball allow",new Point(300,300),1,2,new Scalar(0,0,0));
+                }
             }
             Imgproc.drawMarker(dst,center,new Scalar(255, 255, 0, 255));
             pointsDeque.add(center);
@@ -306,51 +323,36 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
                     Imgproc.line(dst,pointsDeque.get(i),pointsDeque.get(i+1),
                             new Scalar(141,222,23),2);
             }
-//            if(center.x> rect1.x && center.x<rect1.x+rect1.width &&
-//                    center.y > rect1.y&& center.y < rect1.y+rect1.height) {
-//                hitFlag =!hitFlag;
-//                hitCounter++;
-//            }
-//            else if(hitFlag &&center.x>400){
-////                hitFlag =!hitFlag;
-////            }else if(!hitFlag &&center.x<400){
-////                hitFlag =!hitFlag;
-////            }
-
-            Imgproc.putText(dst,String.valueOf(hitCounter),new Point(minX,100),
+            if(center.x> rect1.x && center.x<rect1.x+rect1.width &&
+                    center.y > rect1.y&& center.y < rect1.y+rect1.height) {
+                hitFlag =!hitFlag;
+                hitCounter++;
+            }
+            Imgproc.putText(dst,String.valueOf(hitCounter),new Point(175,100),
                     1,3,new Scalar(44,44,44));
             Imgproc.drawContours(dst, contours, -1, counter);
-
             Mat colorLabel = dst.submat(4, 68, 4, 68);
             colorLabel.setTo(ballcolorrgb);
-
             Mat spectrumLabel = dst.submat(4, 4 + thespectrum.rows(), 70, 70 + thespectrum.cols());
             thespectrum.copyTo(spectrumLabel);
         }
-
-
-
         MatOfRect faces = new MatOfRect();
         //absoluteFaceSize=Math.round(rows * 0.2f);
-
         // Use the classifier to detect faces
         if (cascadeClassifier != null) {
             cascadeClassifier.detectMultiScale(dst, faces, 1.1, 3, 2,
                     new Size(absoluteFaceSize, absoluteFaceSize), new Size());
         }
-
-//        Imgproc.rectangle(thergba, new Point(minX,  minY),
-//                new Point( maxX,  maxY), new Scalar(0, 255, 0, 255), 2);
         // If there are any faces found, draw a rectangle around it
         Rect[] facesArray = faces.toArray();
         for (int i = 0; i <facesArray.length; i++) {
+
             Rectangle rect=new Rectangle();
             if (hitFlag) {
                 Imgproc.rectangle(dst, new Point(facesArray[i].x-100, facesArray[i].y+100),
                         new Point(facesArray[i].x, facesArray[i].y + 225)
                         , new Scalar(0, 255, 0, 255), 3);
                 rect.setBounds(facesArray[i].x-100,facesArray[i].y+100,100,125);
-
             }
             else {
                 Imgproc.rectangle(dst, new Point(facesArray[i].x+100, facesArray[i].y+100),
@@ -359,9 +361,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
                 rect.setBounds(facesArray[i].x+100,facesArray[i].y+100,100,125);
             }
             setRectangle(rect);
-
         }
-        Imgproc.rectangle(dst,new Point(180,0),new Point(540,475),new Scalar(255,32,22));
         return dst;
     }
 

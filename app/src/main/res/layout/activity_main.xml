@@ -38,8 +38,8 @@
 
     <ImageView
         android:id="@+id/imageView8"
-        android:layout_width="430dp"
-        android:layout_height="459dp"
+        android:layout_width="177dp"
+        android:layout_height="117dp"
         android:alpha="0.55"
         android:src="@drawable/ballimage"
         opencv:layout_constraintBottom_toBottomOf="parent"
@@ -80,6 +80,8 @@
 
         opencv:layout_constraintBottom_toBottomOf="parent"
         opencv:layout_constraintEnd_toEndOf="@+id/mycamera"
+        opencv:layout_constraintHorizontal_bias="0.0"
         opencv:layout_constraintStart_toStartOf="@+id/mycamera"
-        opencv:layout_constraintTop_toTopOf="@+id/mycamera" />
+        opencv:layout_constraintTop_toTopOf="@+id/mycamera"
+        opencv:layout_constraintVertical_bias="0.0" />
 </androidx.constraintlayout.widget.ConstraintLayout>
