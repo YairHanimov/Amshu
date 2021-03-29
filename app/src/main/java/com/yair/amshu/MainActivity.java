@@ -186,18 +186,23 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     }
 
     public boolean onTouch(View v, MotionEvent event) {
+
+
+        return false; // don't need subsequent touch events
+    }
+    public void setBallColor(){
         int cols = dst.cols();
         int rows = dst.rows();
 
         int xOffset = (opencvcam.getWidth() - cols) / 2;
         int yOffset = (opencvcam.getHeight() - rows) / 2;
 
-        int x = (int)event.getX() - xOffset;
-        int y = (int)event.getY() - yOffset;
+        int x = cols/2;
+        int y = rows/2;
 
         Log.i(TAG, "Touch image coordinates: (" + x + ", " + y + ")");
 
-        if ((x < 0) || (y < 0) || (x > cols) || (y > rows)) return false;
+        if ((x < 0) || (y < 0) || (x > cols) || (y > rows)) return;
 
         Rect touchedRect = new Rect();
 
@@ -231,8 +236,6 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
         touchedRegionRgba.release();
         touchedRegionHsv.release();
-
-        return false; // don't need subsequent touch events
     }
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         int minX=175;
@@ -451,7 +454,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         ImageView ballvisbility  = (ImageView) findViewById(R.id.imageView8);
 
         if (ballvisbility.getVisibility() == View.VISIBLE) {
-            // Its visible
+
         } else {
             ImageButton button = (ImageButton) c;
             SharedPreferences shared = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
@@ -475,6 +478,9 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
                 if (ballvisbility.getVisibility() == View.VISIBLE) {
                     makevisble();
                     ballvisbility.setVisibility(View.INVISIBLE);
+                    ImageButton xcanbtb  = (ImageButton) findViewById(R.id.scanbtn);
+                    xcanbtb.setVisibility(View.INVISIBLE);
+
                     mp2.start();
 
 
@@ -597,6 +603,11 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
     public void back_to_menu(View view) {
         setContentView(R.layout.firstscreen);
+
+    }
+
+    public void scan_btn(View view) {
+         setBallColor();
 
     }
 }
