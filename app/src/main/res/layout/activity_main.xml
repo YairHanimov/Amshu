@@ -80,17 +80,19 @@
 
         opencv:layout_constraintBottom_toBottomOf="parent"
         opencv:layout_constraintEnd_toEndOf="@+id/mycamera"
+        opencv:layout_constraintHorizontal_bias="0.0"
         opencv:layout_constraintStart_toStartOf="@+id/mycamera"
-        opencv:layout_constraintTop_toTopOf="@+id/mycamera" />
+        opencv:layout_constraintTop_toTopOf="@+id/mycamera"
+        opencv:layout_constraintVertical_bias="1.0" />
 
     <ImageButton
         android:id="@+id/scanbtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="4dp"
         android:background="@null"
-        android:src="@drawable/scanbtn"
         android:onClick="scan_btn"
+        android:src="@drawable/scanbtn"
 
         android:text="Button"
         opencv:layout_constraintEnd_toEndOf="parent"

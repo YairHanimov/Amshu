@@ -259,12 +259,15 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
             final List<MatOfPoint> contours = ditaction.getContours();
             Point center = new Point();
             for(MatOfPoint list:contours){
+                /**
                 if (contours.toArray().length==1) {
                     center = Kmeans(list);
                 }
                 else {
                     Imgproc.putText(dst,"only 1 ball allow",new Point(dst.cols()/2,dst.rows()/2),1,2,new Scalar(0,0,0));
                 }
+                 **/
+                center = Kmeans(list);
             }
             Imgproc.drawMarker(dst,center,new Scalar(255, 255, 0, 255));
             pointsDeque.add(center);
@@ -552,10 +555,14 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
                 VideoView videoView = (VideoView)findViewById(R.id.videoView2);
                 videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.test);
                  videoView.start();
-                 videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                findViewById(R.id.qmark).setVisibility(View.INVISIBLE);
+
+                videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
             @Override
             public void onCompletion(MediaPlayer mp) {
+                findViewById(R.id.qmark).setVisibility(View.VISIBLE);
+
                 findViewById(R.id.videoView2).setVisibility(View.INVISIBLE);
 
 
