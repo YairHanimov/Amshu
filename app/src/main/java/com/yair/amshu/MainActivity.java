@@ -80,6 +80,8 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     int lag_crash=0;
     private boolean hitFlag =true;
     List<Point> pointsDeque = new ArrayList<Point>();
+    List<Point> pointsDeque2 = new ArrayList<Point>();
+
     List<Mat> frames=new ArrayList<>();
     private BaseLoaderCallback theLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -239,8 +241,10 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         touchedRegionRgba.release();
         touchedRegionHsv.release();
     }
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+         Mat res = new Mat();
+        int scanbool =0;
         //set the input frame from camera to display on smartphone screen
         Mat rgba=inputFrame.rgba();
         Core.flip(rgba,rgba,0);
@@ -250,24 +254,34 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         Imgproc.warpAffine(rgba, dst,m,rgba.size());
         Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGBA2RGB);
         //Imgproc.medianBlur(dst,dst,3);
+
         Imgproc.drawMarker(dst,new Point(dst.cols()*3/4,dst.rows()/4),new Scalar(255, 255, 0, 255));
         if(!colorselect) {
         }
         else {
             afterballt();
+            scanbool++;
+            Scalar p1 = ditaction.getLowBound();
+            Scalar p2 = ditaction.getUpBound();
+            Scalar colorlowrgb = converScalarHsv2Rgba(p1);
+            Scalar coloruprgb = converScalarHsv2Rgba(p2);
             ditaction.process(dst);
             final List<MatOfPoint> contours = ditaction.getContours();
             Point center = new Point();
+
             for(MatOfPoint list:contours){
                 /**
-                if (contours.toArray().length==1) {
-                    center = Kmeans(list);
-                }
-                else {
-                    Imgproc.putText(dst,"only 1 ball allow",new Point(dst.cols()/2,dst.rows()/2),1,2,new Scalar(0,0,0));
-                }
+                 if (contours.toArray().length==1) {
+                 center = Kmeans(list);
+                 }
+                 else {
+                 Imgproc.putText(dst,"only 1 ball allow",new Point(dst.cols()/2,dst.rows()/2),1,2,new Scalar(0,0,0));
+                 }
                  **/
-                center = Kmeans(list);
+                // center = Kmeans(list);
+                Kmeans kmean_algo=  new Kmeans(list);
+                center = kmean_algo.getcenter();
+
             }
             Imgproc.drawMarker(dst,center,new Scalar(255, 255, 0, 255));
             pointsDeque.add(center);
@@ -279,24 +293,55 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
                     Imgproc.line(dst,pointsDeque.get(i),pointsDeque.get(i+1),
                             new Scalar(141,222,23),2);
             }
-            List<MatOfPoint> contours2=movementDetection(dst,m);
-            for(MatOfPoint cont:contours2) {
-                Rect aa=Imgproc.boundingRect(cont);
-                if(aa.x> rect1.x && aa.x<rect1.x+rect1.width &&
-                        aa.y > rect1.y&& aa.y < rect1.y+rect1.height){
-                    hitFlag =!hitFlag;
-                    hitCounter++;
+           /** new**/
+            /** new**/
+            Mat mask = new Mat();
+
+//
+            Mat gray = new Mat();
+            Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGBA2BGR);
+//
+
+            Imgproc.cvtColor(dst, gray, Imgproc.COLOR_BGR2HSV_FULL);
+            Core.inRange(gray,
+                    new Scalar(p1.val[0], p1.val[1],p1.val[2]),new
+                            Scalar(p2.val[0], p2.val[1],p2.val[2]), mask);
+              Core.bitwise_and(gray, gray,res,mask);
+
+            List<MatOfPoint> contours2=movementDetection(res,m);
+
+            if(center.x> rect1.x && center.x<rect1.x+rect1.width &&
+                    center.y > rect1.y&& center.y < rect1.y+rect1.height) {
+//                hitFlag =!hitFlag;
+//                hitCounter++;
+            }
+            else {
+              Point center2 = new Point();
+                for (MatOfPoint cont : contours2) {
+                    Kmeans kk = new Kmeans( cont);
+                    center2 = kk.getcenter();
+                    Rect aa=Imgproc.boundingRect(cont);
+                //    Imgproc.rectangle(res,new Point(aa.x,aa.y) ,new Point(aa.x+aa.width,aa.y+aa.height),  new Scalar(0, 255, 0, 255), 3);
+                //    Imgproc.drawMarker(res,center2,new Scalar(255, 255, 0, 255));
+
+
+                    if(center2.x> rect1.x && center2.x<rect1.x+rect1.width &&
+                            center2.y > rect1.y&& center2.y < rect1.y+rect1.height) {
+                        Imgproc.rectangle(res,new Point(aa.x,aa.y) ,new Point(aa.x+aa.width,aa.y+aa.height),  new Scalar(0, 255, 0, 255), 3);
+
+                        hitFlag =!hitFlag;
+                        hitCounter++;
+                        break;
+                    }
                 }
             }
+
+
 
             TextView score   = (TextView) findViewById(R.id.score_counter_xml);
 
             score.setText(String.valueOf(hitCounter));
-            if(center.x> rect1.x && center.x<rect1.x+rect1.width &&
-                    center.y > rect1.y&& center.y < rect1.y+rect1.height) {
-                hitFlag =!hitFlag;
-                hitCounter++;
-            }
+
             Imgproc.drawContours(dst, contours, -1, counter);
             Mat colorLabel = dst.submat(4, 68, 4, 68);
             colorLabel.setTo(ballcolorrgb);
@@ -317,19 +362,25 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
             }
             Rectangle rect=new Rectangle();
             if(hitFlag) {
-                Imgproc.rectangle(dst, new Point(facesArray[i].x - facesArray[i].width *2/ 3, facesArray[i].y),
+                Imgproc.rectangle(res, new Point(facesArray[i].x - facesArray[i].width *2/ 3, facesArray[i].y),
                         new Point(facesArray[i].x, facesArray[i].y + facesArray[i].height*2/3)
                         , new Scalar(0, 255, 0, 255), 3);
                 rect.setBounds(facesArray[i].x - facesArray[i].width*2/ 3, facesArray[i].y, facesArray[i].width*2 / 3, facesArray[i].height*2 / 3);
             }else{
-                Imgproc.rectangle(dst, new Point(facesArray[i].x + facesArray[i].width, facesArray[i].y),
+                Imgproc.rectangle(res, new Point(facesArray[i].x + facesArray[i].width, facesArray[i].y),
                         new Point(facesArray[i].x+facesArray[i].width+facesArray[i].width*2 / 3, facesArray[i].y + facesArray[i].height*2/3)
                         , new Scalar(0, 255, 0, 255), 3);
                 rect.setBounds(facesArray[i].x + facesArray[i].width, facesArray[i].y , facesArray[i].width*2 / 3, facesArray[i].height*2 / 3);
             }
             setRectangle(rect);
         }
-        return dst;
+
+      if (scanbool==0){
+          return dst;
+      }
+        //return dst;
+
+        return  res;
     }
 
 
@@ -373,14 +424,14 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     public void setRectangle(Rectangle rect){
         this.rect1=rect;
     }
-    public Point Kmeans(MatOfPoint list){
-        Point center=new Point(0,0);
-        for(int i=0;i<list.toList().size();i++){
-            center.set(new double[]{list.toList().get(i).x+center.x, list.toList().get(i).y+center.y});
-        }
-        center.set(new double[]{center.x/list.toList().size(),center.y/list.toList().size()});
-        return center;
-    }
+//    public Point Kmeans(MatOfPoint list){
+//        Point center=new Point(0,0);
+//        for(int i=0;i<list.toList().size();i++){
+//            center.set(new double[]{list.toList().get(i).x+center.x, list.toList().get(i).y+center.y});
+//        }
+//        center.set(new double[]{center.x/list.toList().size(),center.y/list.toList().size()});
+//        return center;
+//    }
 
     public void onRadioButtonClicked(View view) {
 

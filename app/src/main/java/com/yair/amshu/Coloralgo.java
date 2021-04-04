@@ -104,4 +104,11 @@ public class Coloralgo {
     public List<MatOfPoint> getContours() {
         return mContours;
     }
+
+    public Scalar getLowBound(){
+        return this.LowBound;
+    }
+    public Scalar getUpBound(){
+        return this.UpBound;
+    }
 }
