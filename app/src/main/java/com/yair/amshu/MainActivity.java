@@ -2,31 +2,22 @@ package com.yair.amshu;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.hardware.camera2.params.Face;
-import android.media.FaceDetector;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import android.app.Activity;
 import android.os.CountDownTimer;
-import android.preference.PreferenceManager;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.RatingBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.VideoView;
 
 import androidx.constraintlayout.solver.widgets.Rectangle;
@@ -35,11 +26,11 @@ import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
-import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
@@ -54,8 +45,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.opencv.core.Core.flip;
-
 public class MainActivity extends Activity implements View.OnTouchListener, CameraBridgeViewBase.CvCameraViewListener2 {
     private static final String  TAG              = "MainActivity";
 
@@ -68,22 +57,20 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     public static final String MyPREFERENCES = "MyPrefs" ;
     private Mat oldFrame;
     private CameraBridgeViewBase opencvcam;
-    Mat mat1;
     private int absoluteFaceSize;
     private Rectangle rect1,rect2;
     private Rect aaa,aaa2;
-    private boolean flag=true,flag2=false,flag3=true;
+    private boolean hitFlag =true,flag=true, countBackFlag =false,faceDetecFlag=false;
     SharedPreferences sharedpreferences;
    // MediaPlayer mp2 ;
    // MediaPlayer mp1;
-    int hitCounter=0;
-    int lag_crash=0;
-    private boolean hitFlag =true;
-    int a = 0,b=0,c=0,d=0;
-    List<Point> pointsDeque = new ArrayList<Point>();
-    List<List<Point>> pointsDequeList=new ArrayList<>();
-    ArrayList<Mat> frames1=new ArrayList<>();
-    ArrayList<Mat> frames2=new ArrayList<>();
+    private int hitCounter=0;
+    private int lag_crash=0;
+    private int a = 0,b=0,c=0,d=0;
+    private List<Point> pointsDeque = new ArrayList<Point>();
+    private List<List<Point>> pointsDequeList=new ArrayList<>();
+    private ArrayList<Mat> frames1=new ArrayList<>();
+    private ArrayList<Mat> frames2=new ArrayList<>();
     private BaseLoaderCallback theLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -195,6 +182,7 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
     }
 
     public boolean onTouch(View v, MotionEvent event) {
+
         return false; // don't need subsequent touch events
     }
     public void setBallColor(){
@@ -238,7 +226,10 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         colorselect = true;
         touchedRegionRgba.release();
         touchedRegionHsv.release();
+        //afer detecting ball color continue to user location
+        afterballt();
     }
+
     public List<MatOfPoint> MovementDetection(Mat roi,List<Mat> frames) {
         Mat diff=new Mat();
         Mat gray = new Mat();
@@ -251,17 +242,17 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         frames.add(res);
         if (frames.size() != 2) return contours;
 
-            Core.absdiff(frames.get(0), frames.get(1), diff);
-            frames.remove(0);
-            Imgproc.cvtColor(diff, gray, Imgproc.COLOR_RGB2GRAY);
-            Imgproc.medianBlur(gray, gray, 5);
-            Imgproc.threshold(gray, gray, 20, 255, Imgproc.THRESH_BINARY);
-            Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3));
-            Imgproc.dilate(gray, gray, kernel);
-            Mat hierarchy = new Mat();
-            Imgproc.findContours(gray, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-            frames.clear();
-            return contours;
+        Core.absdiff(frames.get(0), frames.get(1), diff);
+        frames.remove(0);
+        Imgproc.cvtColor(diff, gray, Imgproc.COLOR_RGB2GRAY);
+        Imgproc.medianBlur(gray, gray, 5);
+        Imgproc.threshold(gray, gray, 20, 255, Imgproc.THRESH_BINARY);
+        Mat kernel = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(3, 3));
+        Imgproc.dilate(gray, gray, kernel);
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(gray, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
+        frames.clear();
+        return contours;
 
     }
 
@@ -274,12 +265,25 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         Imgproc.warpAffine(rgba, dst,m,rgba.size());
         Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGBA2RGB);
         //Imgproc.medianBlur(dst,dst,3);
-        List<MatOfPoint> contours,contours2;
+
         TextView score   = (TextView) findViewById(R.id.score_counter_xml);
         score.setText(String.valueOf(hitCounter));
+        if(countBackFlag) {
+            faceDetection();
+        }
 
-        //face detection
-        if(flag2) {
+        if(colorselect) {
+            if(!faceDetecFlag){
+                Imgproc.putText(dst, "I need to see your face", new Point(dst.rows() / 2, dst.rows() / 2),
+                        1, 2, new Scalar(0, 0, 0));
+                return dst;
+            }
+            runGame();
+        }
+
+        return dst;
+    }
+    public void faceDetection(){
         MatOfRect faces = new MatOfRect();
         if (cascadeClassifier != null) {
             cascadeClassifier.detectMultiScale(dst, faces, 1.1, 3, 2,
@@ -288,7 +292,8 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
         Rect[] facesArray = faces.toArray();
         for (int i = 0; i < facesArray.length; i++) {
             if (facesArray.length != 1) {
-                Imgproc.putText(dst, "only 1 person allow", new Point(dst.rows() / 2, dst.rows() / 2), 1, 2, new Scalar(0, 0, 0));
+                Imgproc.putText(dst, "only 1 person allow", new Point(dst.rows() / 2, dst.rows() / 2),
+                        1, 2, new Scalar(0, 0, 0));
                 break;
             }
             if (flag) {
@@ -296,46 +301,69 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
                 d = facesArray[i].height * 2 / 3;
                 flag = false;
             }
-            a = facesArray[i].x;
-            b = facesArray[i].y - d;
+            a = (facesArray[i].x > 0) ? facesArray[i].x : 0;
+            b = (facesArray[i].y - d > 0) ? facesArray[i].y - d : 0;
             rect1.setBounds(a - c, b, c, d);
             rect2.setBounds(a + c, b, c, d);
+            faceDetecFlag=true;
             if (hitFlag) {
                 Imgproc.rectangle(dst, new Point(a - c, b), new Point(a, b + d), new Scalar(0, 0, 255), 3);
-                aaa.set(a - c, b, c, d);
             } else {
                 Imgproc.rectangle(dst, new Point(a + c, b), new Point(a + 2 * c, b + d), new Scalar(0, 0, 255), 3);
-                aaa2.set(a + c, b, c, d);
-            }
-
             }
         }
-        //start the training
-        if(colorselect&&rect1!=null&&rect2!=null&&flag2) {
-            if(flag3) {
-                afterballt();
-                flag3=false;
-            }
-            aaa.set(rect1.x, rect1.y, rect1.width, rect1.height);
-            aaa2.set(rect2.x, rect2.y, rect2.width, rect2.height);
-            Mat roi = dst.submat(aaa);
-            Mat roi2 = dst.submat(aaa2);
-            contours=MovementDetection(roi,frames1);
-            contours2=MovementDetection(roi2,frames2);
-            if (contours.size()>0&&hitFlag) {
-                hitCounter++;
-                hitFlag=false;
-                //frames.clear();
+    }
+    public void runGame(){
+        List<MatOfPoint> contours,contours2;
 
-            }
-            if (contours2.size()>0&&!hitFlag) {
-                hitCounter++;
-                hitFlag=true;
-            }
-            //return res;
+        aaa.set(rect1.x, rect1.y, rect1.width, rect1.height);
+        aaa2.set(rect2.x, rect2.y, rect2.width, rect2.height);
+        Mat roi = dst.submat(aaa);
+        Mat roi2 = dst.submat(aaa2);
+        contours=MovementDetection(roi,frames1);
+        contours2=MovementDetection(roi2,frames2);
+        drawBallCenter();
+        if (contours.size()>0&&hitFlag) {
+            hitCounter++;
+            hitFlag=false;
+
+        }
+        if (contours2.size()>0&&!hitFlag) {
+            hitCounter++;
+            hitFlag=true;
+
         }
 
-        return dst;
+        //return res;
+    }
+    private void drawBallCenter(){
+        List<Point> centers = new ArrayList<Point>();
+        float[] radius = new float[1];
+        MatOfPoint2f b = new MatOfPoint2f();
+        //draw center of the ball
+        ditaction.process(dst);
+        final List<MatOfPoint> contours = ditaction.getContours();
+        for(MatOfPoint list:contours){
+                centers.add(Kmeans(list));
+            list.convertTo(b, CvType.CV_32F);
+        }
+        //draw detecting line after ball movement
+        for(Point center:centers) {
+            Imgproc.drawMarker(dst, center, new Scalar(255, 0, 0));
+            pointsDeque.add(center);
+            if (pointsDeque.size() >= 10)
+                pointsDeque.remove(0);
+            for (int i = 0; i < pointsDeque.size() - 1; i++) {
+                if (pointsDeque.get(i).x > 0 && pointsDeque.get(i).y > 0 &&
+                        pointsDeque.get(i + 1).x > 0 && pointsDeque.get(i + 1).y > 0)
+                    Imgproc.line(dst, pointsDeque.get(i), pointsDeque.get(i + 1),
+                            new Scalar(141, 222, 23), 2);
+            }
+            //draw circle around the ball
+            Imgproc.minEnclosingCircle(b,center,radius);
+            Imgproc.circle(dst,center,(int)radius[0],new Scalar(255,0,0));
+        }
+
     }
     private Scalar converScalarHsv2Rgba(Scalar hsvColor) {
         Mat pointMatRgba = new Mat();
@@ -575,14 +603,14 @@ public class MainActivity extends Activity implements View.OnTouchListener, Came
 
             public void onTick(long millisUntilFinished) {
                 timer_xml.setText(String.valueOf((int)(millisUntilFinished / 1000)));
-
             }
 
             public void onFinish() {
                 ImageButton person_image  = (ImageButton) findViewById(R.id.button_person);
+
                 timer_xml.setVisibility(View.INVISIBLE);
                 person_image.setVisibility(View.INVISIBLE);
-                flag2=true;
+                countBackFlag =true;
 
             }
 
