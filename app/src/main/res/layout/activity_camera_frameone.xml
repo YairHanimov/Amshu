@@ -69,8 +69,8 @@
         android:layout_width="123dp"
         android:layout_height="128dp"
         android:background="@null"
-        android:src="@drawable/qmark"
         android:onClick="show_vid_one"
+        android:src="@drawable/qmark"
         opencv:layout_constraintBottom_toBottomOf="parent"
         opencv:layout_constraintEnd_toEndOf="parent" />
 
@@ -85,20 +85,21 @@
         opencv:layout_constraintStart_toStartOf="@+id/mycamera"
         opencv:layout_constraintTop_toTopOf="@+id/mycamera" />
 
+
     <ImageButton
         android:id="@+id/scanbtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
-        android:background="@null"
-        android:src="@drawable/scanbtn"
-        android:onClick="scan_btn"
+        android:layout_width="137dp"
+        android:layout_height="126dp"
 
+        android:background="@null"
+
+        android:onClick="scan_btn"
+        android:src="@drawable/scan_test"
         android:text="Button"
-        opencv:layout_constraintEnd_toEndOf="parent"
-        opencv:layout_constraintHorizontal_bias="0.934"
-        opencv:layout_constraintStart_toStartOf="parent"
-        opencv:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/score_counter_xml"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/textView"

@@ -81,6 +81,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     private Rect aaa,aaa2;
     private boolean hitFlag =true,flag=true, countBackFlag =false,faceDetecFlag=false;
     SharedPreferences sharedpreferences;
+    scoremanager scoremanage1;
     // MediaPlayer mp2 ;
     // MediaPlayer mp1;
     int hitCounter=0;
@@ -97,7 +98,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
         opencvcam.setVisibility(SurfaceView.VISIBLE);
         opencvcam.setCvCameraViewListener(this);
-
+        scoremanage1 = new scoremanager(this);
 
     }
 
@@ -189,7 +190,9 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         //Imgproc.medianBlur(dst,dst,3);
         List<MatOfPoint> contours,contours2;
         TextView score   = (TextView) findViewById(R.id.score_counter_xml);
-        score.setText(String.valueOf(hitCounter));
+        //score.setText(String.valueOf(hitCounter));
+        score.setText(String.valueOf(scoremanage1.get_score()));
+
         if(countBackFlag) {
             MatOfRect faces = new MatOfRect();
             if (cascadeClassifier != null) {
@@ -233,12 +236,15 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             contours=MovementDetection(roi,frames1);
             contours2=MovementDetection(roi2,frames2);
             if (contours.size()>0&&hitFlag) {
-                hitCounter++;
+                //hitCounter++;
+                scoremanage1.addscore(1);
                 hitFlag=false;
 
             }
             if (contours2.size()>0&&!hitFlag) {
-                hitCounter++;
+              //  hitCounter++;
+                scoremanage1.addscore(1);
+
                 hitFlag=true;
 
             }
@@ -312,6 +318,8 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
 
 
                 findViewById(R.id.videoView2).setVisibility(View.VISIBLE);
+                findViewById(R.id.scanbtn).setVisibility(View.INVISIBLE);
+
                 VideoView videoView = (VideoView)findViewById(R.id.videoView2);
                 videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.test);
                 videoView.start();
@@ -320,7 +328,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                     @Override
                     public void onCompletion(MediaPlayer mp) {
                         findViewById(R.id.videoView2).setVisibility(View.INVISIBLE);
-
+                        findViewById(R.id.scanbtn).setVisibility(View.VISIBLE);
 
                     }
                 });
