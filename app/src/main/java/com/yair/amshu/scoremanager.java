@@ -34,7 +34,7 @@ public class scoremanager {
         return this.score_star;
     }
     public  void addscore(int i ){
-        this.score_point++;
+        this.score_point= (this.score_point+i);
         SharedPreferences shared = this.context.getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
         String channel = (shared.getString("key", ""));
 
@@ -44,6 +44,7 @@ public class scoremanager {
             editor.putString("key", num);
             editor.apply();        }
         }
+
     }
 
 

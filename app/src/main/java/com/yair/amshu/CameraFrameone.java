@@ -80,6 +80,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     private Rectangle rect1,rect2;
     private Rect aaa,aaa2;
     private boolean hitFlag =true,flag=true, countBackFlag =false,faceDetecFlag=false;
+    public  CountDownTimer remainingTimeCounter;
     SharedPreferences sharedpreferences;
     scoremanager scoremanage1;
     // MediaPlayer mp2 ;
@@ -179,7 +180,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     }
 
     @Override
-    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame){
         Mat rgba=inputFrame.rgba();
         Core.flip(rgba,rgba,0);
         int cols = rgba.cols();
@@ -188,72 +189,87 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         Imgproc.warpAffine(rgba, dst,m,rgba.size());
         Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGBA2RGB);
         //Imgproc.medianBlur(dst,dst,3);
-        List<MatOfPoint> contours,contours2;
         TextView score   = (TextView) findViewById(R.id.score_counter_xml);
         //score.setText(String.valueOf(hitCounter));
         score.setText(String.valueOf(scoremanage1.get_score()));
 
+//        TextView score   = (TextView) findViewById(R.id.score_counter_xml);
+//        score.setText(String.valueOf(hitCounter));
         if(countBackFlag) {
-            MatOfRect faces = new MatOfRect();
-            if (cascadeClassifier != null) {
-                cascadeClassifier.detectMultiScale(dst, faces, 1.1, 3, 2,
-                        new Size(absoluteFaceSize, absoluteFaceSize), new Size());
-            }
-            Rect[] facesArray = faces.toArray();
-            for (int i = 0; i < facesArray.length; i++) {
-                if (facesArray.length != 1) {
-                    Imgproc.putText(dst, "only 1 person allow", new Point(dst.rows() / 2, dst.rows() / 2), 1, 2, new Scalar(0, 0, 0));
-                    break;
-                }
-                if (flag) {
-                    c = facesArray[i].width * 2 / 3;
-                    d = facesArray[i].height * 2 / 3;
-                    flag = false;
-                }
-                a = (facesArray[i].x > 0) ? facesArray[i].x : 0;
-                b = (facesArray[i].y - d > 0) ? facesArray[i].y - d : 0;
-                rect1.setBounds(a - c, b, c, d);
-                rect2.setBounds(a + c, b, c, d);
-                faceDetecFlag=true;
-                if (hitFlag) {
-                    Imgproc.rectangle(dst, new Point(a - c, b), new Point(a, b + d), new Scalar(0, 0, 255), 3);
-                } else {
-                    Imgproc.rectangle(dst, new Point(a + c, b), new Point(a + 2 * c, b + d), new Scalar(0, 0, 255), 3);
-                }
-            }
+            faceDetection();
         }
 
         if(colorselect) {
             if(!faceDetecFlag){
-                Imgproc.putText(dst, "we need to see your face", new Point(dst.rows() / 2, dst.rows() / 2),
+                Imgproc.putText(dst, "I need to see your face", new Point(dst.rows() / 2, dst.rows() / 2),
                         1, 2, new Scalar(0, 0, 0));
                 return dst;
             }
-            aaa.set(rect1.x, rect1.y, rect1.width, rect1.height);
-            aaa2.set(rect2.x, rect2.y, rect2.width, rect2.height);
-            Mat roi = dst.submat(aaa);
-            Mat roi2 = dst.submat(aaa2);
-            contours=MovementDetection(roi,frames1);
-            contours2=MovementDetection(roi2,frames2);
-            if (contours.size()>0&&hitFlag) {
-                //hitCounter++;
-                scoremanage1.addscore(1);
-                hitFlag=false;
-
-            }
-            if (contours2.size()>0&&!hitFlag) {
-              //  hitCounter++;
-                scoremanage1.addscore(1);
-
-                hitFlag=true;
-
-            }
-
-            //return res;
+            runGame();
         }
 
-        return dst;    }
+        return dst;
+    }
+    public void faceDetection(){
+        MatOfRect faces = new MatOfRect();
+        if (cascadeClassifier != null) {
+            cascadeClassifier.detectMultiScale(dst, faces, 1.1, 3, 2,
+                    new Size(absoluteFaceSize, absoluteFaceSize), new Size());
+        }
+        Rect[] facesArray = faces.toArray();
+        for (int i = 0; i < facesArray.length; i++) {
+            if (facesArray.length != 1) {
+                Imgproc.putText(dst, "only 1 person allow", new Point(dst.rows() / 2, dst.rows() / 2), 1, 2, new Scalar(0, 0, 0));
+                break;
+            }
+            if (flag) {
+                c = facesArray[i].width * 2 / 3;
+                d = facesArray[i].height * 2 / 3;
+                flag = false;
+            }
+            a = (facesArray[i].x > 0) ? facesArray[i].x : 0;
+            b = (facesArray[i].y - d > 0) ? facesArray[i].y - d : 0;
+            rect1.setBounds(a - c, b, c, d);
+            rect2.setBounds(a + c, b, c, d);
+            faceDetecFlag=true;
+            if (hitFlag) {
+                Imgproc.rectangle(dst, new Point(a - c, b), new Point(a, b + d), new Scalar(0, 0, 255), 3);
+            } else {
+                Imgproc.rectangle(dst, new Point(a + c, b), new Point(a + 2 * c, b + d), new Scalar(0, 0, 255), 3);
+            }
+        }
+    }
+    public void runGame(){
 
+
+        List<MatOfPoint> contours,contours2;
+
+        aaa.set(rect1.x, rect1.y, rect1.width, rect1.height);
+        aaa2.set(rect2.x, rect2.y, rect2.width, rect2.height);
+        Mat roi = dst.submat(aaa);
+        Mat roi2 = dst.submat(aaa2);
+        contours=MovementDetection(roi,frames1);
+        contours2=MovementDetection(roi2,frames2);
+        if (contours.size()>0&&hitFlag) {
+            //hitCounter++;
+            scoremanage1.addscore(1);
+            hitFlag=false;
+            remainingTimeCounter.cancel();
+            remainingTimeCounter.start();
+
+
+        }
+        if (contours2.size()>0&&!hitFlag) {
+           // hitCounter++;
+            scoremanage1.addscore(1);
+            hitFlag=true;
+            remainingTimeCounter.cancel();
+            remainingTimeCounter.start();
+
+        }
+
+        //return res;
+    }
     private void initializeOpenCVDependencies() {
 
         try {
@@ -373,10 +389,23 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                 timer_xml.setVisibility(View.INVISIBLE);
                 person_image.setVisibility(View.INVISIBLE);
                 countBackFlag =true;
+                remainingTimeCounter.start();
 
             }
 
         }.start();
+
+         remainingTimeCounter =  new CountDownTimer(3000, 1000) {
+            TextView timerscore   = (TextView) findViewById(R.id.timescoretest);
+            public void onTick(long millisUntilFinished) {
+                timerscore.setText( String.valueOf((int)+(millisUntilFinished / 1000)));
+            }
+
+            public void onFinish() {
+                scoremanage1.addscore(-1);
+                this.start(); //start again the CountDownTimer
+            }
+        };
 
     }
 
