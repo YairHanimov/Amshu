@@ -76,6 +76,8 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     public static final String MyPREFERENCES = "MyPrefs" ;
     private CameraBridgeViewBase opencvcam;
     private int absoluteFaceSize;
+    scoremanager scoremanage1;
+    public  CountDownTimer remainingTimeCounter;
 
     private boolean hitFlag =true,flag=true, countBackFlag =false,faceDetecFlag=false;
     SharedPreferences sharedpreferences;
@@ -94,6 +96,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
         opencvcam.setVisibility(SurfaceView.VISIBLE);
         opencvcam.setCvCameraViewListener(this);
+        scoremanage1 = new scoremanager(this);
 
 
     }
@@ -213,7 +216,8 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         //Imgproc.medianBlur(dst,dst,3);
 
         TextView score   = (TextView) findViewById(R.id.score_counter_xml);
-        score.setText(String.valueOf(hitCounter));
+        //score.setText(String.valueOf(hitCounter));
+        score.setText(String.valueOf(scoremanage1.get_score()));
         if(countBackFlag) {
             faceDetection();
         }
@@ -272,13 +276,20 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         contours2=rightHitArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
         //drawBallCenter();
         if (contours.size() > 0 && hitFlag) {
-            hitCounter++;
+           // hitCounter++;
+            scoremanage1.addscore(1);
             hitFlag = false;
+            remainingTimeCounter.cancel();
+            remainingTimeCounter.start();
             return;
+
         }
         else if (contours2.size() > 0 && !hitFlag) {
-            hitCounter++;
+           // hitCounter++;
+            scoremanage1.addscore(1);
             hitFlag = true;
+            remainingTimeCounter.cancel();
+            remainingTimeCounter.start();
             return;
         }
     }
@@ -383,10 +394,23 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                 timer_xml.setVisibility(View.INVISIBLE);
                 person_image.setVisibility(View.INVISIBLE);
                 countBackFlag =true;
+                remainingTimeCounter.start();
 
             }
 
         }.start();
+
+        remainingTimeCounter =  new CountDownTimer(3000, 1000) {
+            TextView timerscore   = (TextView) findViewById(R.id.timescoretest);
+            public void onTick(long millisUntilFinished) {
+                timerscore.setText( String.valueOf((int)+(millisUntilFinished / 1000)));
+            }
+
+            public void onFinish() {
+                scoremanage1.addscore(-1);
+                this.start(); //start again the CountDownTimer
+            }
+        };
 
     }
 
