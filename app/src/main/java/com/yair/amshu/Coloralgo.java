@@ -27,6 +27,12 @@ public class Coloralgo {
     Mat Mask = new Mat();
     Mat DilatedMask = new Mat();
     Mat Hierarchy = new Mat();
+    public Scalar getLowBound(){
+        return this.LowBound;
+    }
+    public Scalar getUpBound(){
+        return this.UpBound;
+    }
 
     public void setColorRadius(Scalar radius) {
         ColorRadius = radius;

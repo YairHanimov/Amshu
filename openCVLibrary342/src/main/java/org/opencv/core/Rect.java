@@ -44,6 +44,12 @@ public class Rect {
             height = 0;
         }
     }
+    public void set(int x, int y, int width, int height) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+    }
 
     public Rect clone() {
         return new Rect(x, y, width, height);
