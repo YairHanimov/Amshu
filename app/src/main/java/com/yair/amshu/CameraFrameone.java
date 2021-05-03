@@ -506,3 +506,4 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
 
     }
 }
+
