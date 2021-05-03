@@ -13,6 +13,7 @@
     >
 
         <activity android:name=".CameraFrameone"></activity>
+        <activity android:name=".CameraFrametwo"></activity>
         <activity android:name=".load_page_ball_1" />
         <activity android:name=".MainActivity">
             <intent-filter>

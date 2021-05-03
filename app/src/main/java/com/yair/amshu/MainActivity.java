@@ -28,64 +28,18 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.constraintlayout.solver.widgets.Rectangle;
 
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfRect;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.objdetect.CascadeClassifier;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends Activity  {
     private static final String  TAG              = "MainActivity";
 
-    private boolean colorselect = false;
-    private Mat dst, thespectrum;
-    private Scalar ballcolorrgb, ballcolorhsv, counter;
-    private Coloralgo ditaction;
-    private Size spectorsize;
-    private CascadeClassifier cascadeClassifier;
+
     public static final String MyPREFERENCES = "MyPrefs" ;
-    private Mat oldFrame;
-    private CameraBridgeViewBase opencvcam;
-    Mat mat1;
-    private int absoluteFaceSize;
-    private Rectangle rect1,rect2;
-    private Rect aaa,aaa2;
-    private boolean hitFlag =true,flag=true, countBackFlag =false,faceDetecFlag=false;
     SharedPreferences sharedpreferences;
-    // MediaPlayer mp2 ;
-    // MediaPlayer mp1;
-    int hitCounter=0;
-    int lag_crash=0;
-    int a = 0,b=0,c=0,d=0;
-    List<Point> pointsDeque = new ArrayList<Point>();
-    List<List<Point>> pointsDequeList=new ArrayList<>();
-    ArrayList<Mat> frames1=new ArrayList<>();
-    ArrayList<Mat> frames2=new ArrayList<>();
-
-
     public MainActivity() {
         Log.i(TAG, "Instantiated new " + this.getClass());
 
     }
-
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -123,14 +77,9 @@ public class MainActivity extends Activity  {
             setContentView(R.layout.firstscreen);
         }
 
-
-
-
-
         //setContentView(R.layout.firstscreen);
 
     }
-
 
 
     public void onRadioButtonClicked(View view) {
@@ -211,13 +160,6 @@ public class MainActivity extends Activity  {
         }
     }
 
-
-
-
-
-
-
-
     public void vid_exm(View v){
         setContentView(R.layout.vid1_page);
         VideoView videoView = (VideoView)findViewById(R.id.videoView);
@@ -247,12 +189,7 @@ public class MainActivity extends Activity  {
         //   mp2.stop();
         recreate();
 
-
-
     }
-
-
-
     public void back_to_menu(View view) {
         setContentView(R.layout.firstscreen);
 
@@ -273,7 +210,6 @@ public class MainActivity extends Activity  {
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
-
     public void popupMessage_level3(){
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setMessage("level  2 must be passed" +
@@ -291,5 +227,4 @@ public class MainActivity extends Activity  {
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
-
 }

@@ -45,28 +45,26 @@ import java.util.List;
 public class CameraFrameone  extends Activity implements View.OnTouchListener, CameraBridgeViewBase.CvCameraViewListener2  {
     private static final String  TAG              = "CameraFrameone";
     private boolean colorselect = false;
-    private Mat dst, thespectrum;
+    protected Mat dst, thespectrum;
     private Scalar ballcolorrgb, ballcolorhsv, counter;
-    private Coloralgo ditaction;
+    protected Coloralgo ditaction;
     private Size spectorsize;
     private CascadeClassifier cascadeClassifier;
     public static final String MyPREFERENCES = "MyPrefs" ;
     private CameraBridgeViewBase opencvcam;
     private int absoluteFaceSize;
     scoremanager scoremanage1;
-    private boolean hitFlag =true,flag=true, countBackFlag =false,faceDetecFlag=false, leftMissFlag =false,rightMissFlag=false;
+    protected boolean hitFlag =true, faceSizeFlag =true, countBackFlag, faceDetectFlag,
+            leftMissFlag ,rightMissFlag;
     SharedPreferences sharedpreferences;
     // MediaPlayer mp2 ;
     // MediaPlayer mp1;
-    private HitArea leftHitArea;
-    private HitArea rightHitArea;
-    private HitArea leftMissArea;
-    private HitArea rightMissArea;
-    private int hitCounter=0;
-    private int a,b,c,d;
+    protected HitArea leftHitArea,rightHitArea,leftMissArea,rightMissArea;
+    protected int faceX, faceY, faceWidth, faceHeight;
     private List<Point> pointsDeque = new ArrayList<Point>();
-    private List<List<Point>> pointsDequeList=new ArrayList<>();
     public CountDownTimer remainingTimeCounter;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,8 +73,6 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         opencvcam.setVisibility(SurfaceView.VISIBLE);
         opencvcam.setCvCameraViewListener(this);
         scoremanage1 = new scoremanager(this);
-
-
     }
 
 
@@ -87,10 +83,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                 case LoaderCallbackInterface.SUCCESS:
                 {
                     initializeOpenCVDependencies();
-
                     Log.i(TAG, "OpenCV loaded successfully");
-
-
                     opencvcam.enableView();
                     opencvcam.setOnTouchListener(CameraFrameone.this);
                 } break;
@@ -108,7 +101,6 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
 
     @Override
     public void onCameraViewStarted(int width, int height) {
-
         dst = new Mat();
         leftHitArea=new HitArea();
         rightHitArea=new HitArea();
@@ -125,7 +117,6 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     @Override
     public void onCameraViewStopped() {
         dst.release();
-
     }
 
     @Override
@@ -157,15 +148,12 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
 
 
     private void initializeOpenCVDependencies() {
-
         try {
             // Copy the resource into a temp file so OpenCV can load it
             InputStream is = getResources().openRawResource(R.raw.lbpcascade_frontalface);
             File cascadeDir = getDir("cascade", Context.MODE_PRIVATE);
             File mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
             FileOutputStream os = new FileOutputStream(mCascadeFile);
-
-
             byte[] buffer = new byte[4096];
             int bytesRead;
             while ((bytesRead = is.read(buffer)) != -1) {
@@ -173,14 +161,11 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             }
             is.close();
             os.close();
-
             // Load the cascade classifier
             cascadeClassifier = new CascadeClassifier(mCascadeFile.getAbsolutePath());
         } catch (Exception e) {
             Log.e("OpenCVActivity", "Error loading cascade", e);
         }
-
-
     }
 
 
@@ -194,16 +179,13 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         Imgproc.warpAffine(rgba, dst,m,rgba.size());
         Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGBA2RGB);
         //Imgproc.medianBlur(dst,dst,3);
-
         TextView score   = (TextView) findViewById(R.id.score_counter_xml);
-        //score.setText(String.valueOf(hitCounter));
         score.setText(String.valueOf(scoremanage1.get_score()));
         if(countBackFlag) {
             faceDetection();
         }
-
         if(colorselect) {
-            if(!faceDetecFlag){
+            if(!faceDetectFlag){
                 Imgproc.putText(dst, "I need to see your face", new Point(dst.rows() / 2, dst.rows() / 2),
                         1, 2, new Scalar(0, 0, 0));
                 return dst;
@@ -226,32 +208,31 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                         1, 2, new Scalar(0, 0, 0));
                 break;
             }
-            if (flag) {
-                c = facesArray[i].width * 2 / 3;
-                d = facesArray[i].height * 2 / 3;
-                flag = false;
+            if (faceSizeFlag) {
+                faceWidth = facesArray[i].width * 2 / 3;
+                faceHeight = facesArray[i].height * 2 / 3;
+                faceSizeFlag = false;
             }
-            a = (facesArray[i].x > 0) ? facesArray[i].x : 0;
-            b = (facesArray[i].y - d > 0) ? facesArray[i].y - d : 0;
-            leftHitArea.displayRect.setBounds(a - c, b, c, d);
-            rightHitArea.displayRect.setBounds(a + c, b, c, d);
+            faceX = (facesArray[i].x > 0) ? facesArray[i].x : 0;
+            faceY = (facesArray[i].y - faceHeight > 0) ? facesArray[i].y - faceHeight : 0;
+            leftHitArea.displayRect.setBounds(faceX - faceWidth, faceY, faceWidth, faceHeight);
+            rightHitArea.displayRect.setBounds(faceX + faceWidth, faceY, faceWidth, faceHeight);
             leftMissArea.displayRect.setBounds(0,0,dst.cols()/2,dst.rows()/2);
             rightMissArea.displayRect.setBounds(dst.cols()/2,0,dst.cols()/2,dst.rows()/2);
-            faceDetecFlag=true;
-            if (hitFlag) {
-                //Imgproc.rectangle(dst,new Point(0,0),new Point(dst.cols()/2,dst.rows()/2),new Scalar(224));
-                Imgproc.rectangle(dst, new Point(a - c, b), new Point(a, b + d), new Scalar(0, 0, 255), 3);
-                Imgproc.rectangle(dst, new Point(a + c, b), new Point(a + 2 * c, b + d), new Scalar(255, 255, 255), 3);
-
-            } else {
-                //Imgproc.rectangle(dst,new Point(dst.cols()/2,0),new Point(dst.cols(),dst.rows()/2),new Scalar(24));
-                Imgproc.rectangle(dst, new Point(a + c, b), new Point(a + 2 * c, b + d), new Scalar(0, 0, 255), 3);
-                Imgproc.rectangle(dst, new Point(a - c, b), new Point(a, b + d), new Scalar(255, 255, 255), 3);
-            }
+            faceDetectFlag =true;
         }
     }
     public void runGame(){
-        List<MatOfPoint> contours,contours2, contours3,contours4;
+        if (hitFlag) {
+            Imgproc.rectangle(dst,new Point(0,0),new Point(dst.cols()/2,dst.rows()/2),new Scalar(224));
+            Imgproc.rectangle(dst, new Point(faceX - faceWidth, faceY), new Point(faceX, faceY + faceHeight), new Scalar(0, 0, 255), 3);
+            Imgproc.rectangle(dst, new Point(faceX + faceWidth, faceY), new Point(faceX + 2 * faceWidth, faceY + faceHeight), new Scalar(255, 255, 255), 3);
+        } else {
+            Imgproc.rectangle(dst,new Point(dst.cols()/2,0),new Point(dst.cols(),dst.rows()/2),new Scalar(24));
+            Imgproc.rectangle(dst, new Point(faceX + faceWidth, faceY), new Point(faceX + 2 * faceWidth, faceY + faceHeight), new Scalar(0, 0, 255), 3);
+            Imgproc.rectangle(dst, new Point(faceX - faceWidth, faceY), new Point(faceX, faceY + faceHeight), new Scalar(255, 255, 255), 3);
+        }
+        List<MatOfPoint> LHcontours,RHcontours, LMcontours,RMcountours;
         leftMissArea.setRectByDisplayRect();
         rightMissArea.setRectByDisplayRect();
         leftHitArea.setRectByDisplayRect();
@@ -260,33 +241,31 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         rightHitArea.setRoiByRect(dst);
         leftMissArea.setRoiByRect(dst);
         rightMissArea.setRoiByRect(dst);
-        contours=leftHitArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
-        contours2=rightHitArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
-        contours3= leftMissArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
-        contours4=rightMissArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
-        //drawBallCenter();
-        if(contours4.size()>0&&!rightMissFlag&&!hitFlag){
+        LHcontours=leftHitArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
+        RHcontours=rightHitArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
+        LMcontours= leftMissArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
+        RMcountours=rightMissArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
+        drawBallCenter();
+        if(RMcountours.size()>0&&!rightMissFlag&&!hitFlag){
             rightMissFlag =true;
             remainingTimeCounter.start();
+            return;
         }
-        if(contours3.size()>0&&!leftMissFlag&&hitFlag){
+        else if(LMcontours.size()>0&&!leftMissFlag&&hitFlag){
             leftMissFlag =true;
             remainingTimeCounter.start();
-
+            return;
         }
-        if (contours.size() > 0 && hitFlag) {
+        else if (LHcontours.size() > 0 && hitFlag) {
             leftMissFlag =false;
             remainingTimeCounter.cancel();
-            // hitCounter++;
             scoremanage1.addscore(1);
             hitFlag = false;
             return;
         }
-        else if (contours2.size() > 0 && !hitFlag) {
+        else if (RHcontours.size() > 0 && !hitFlag) {
             leftMissFlag =false;
             remainingTimeCounter.cancel();
-
-            // hitCounter++;
             scoremanage1.addscore(1);
             hitFlag = true;
 
@@ -301,7 +280,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         ditaction.process(dst);
         final List<MatOfPoint> contours = ditaction.getContours();
         for(MatOfPoint list:contours){
-            centers.add(Kmeans(list));
+            centers.add(KMeans.Cluster(list));
             list.convertTo(list2f, CvType.CV_32F);
         }
         //draw detecting line after ball movement
@@ -323,23 +302,11 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
 
     }
 
-
-
-    public Point Kmeans(MatOfPoint list){
-        Point center=new Point(0,0);
-        for(int i=0;i<list.toList().size();i++){
-            center.set(new double[]{list.toList().get(i).x+center.x, list.toList().get(i).y+center.y});
-        }
-        center.set(new double[]{center.x/list.toList().size(),center.y/list.toList().size()});
-        return center;
-    }
     public void show_vid_one(View view) {
         runOnUiThread(new Runnable() {
 
             @Override
             public void run() {
-
-
                 findViewById(R.id.videoView2).setVisibility(View.VISIBLE);
                 VideoView videoView = (VideoView)findViewById(R.id.videoView2);
                 videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.test);
@@ -349,16 +316,12 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                     @Override
                     public void onCompletion(MediaPlayer mp) {
                         findViewById(R.id.videoView2).setVisibility(View.INVISIBLE);
-
-
                     }
                 });
 
             }
         });
     }
-
-
     public void image_person_click(View view) {
     }
 
@@ -402,11 +365,13 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
 
         remainingTimeCounter =  new CountDownTimer(300, 100) {
             public void onTick(long millisUntilFinished) {
-                //Imgproc.putText(dst,String.valueOf((int)+(millisUntilFinished / 1000)),new Point( 300,300),3,3,new Scalar(15));
             }
 
             public void onFinish() {
-                scoremanage1.addscore(-1);
+                Imgproc.putText(dst, "miss", new Point(dst.rows() / 2, dst.rows() / 2),
+                        1, 2, new Scalar(0, 255, 0));
+                if(scoremanage1.get_score()>0)
+                    scoremanage1.addscore(-1);
                 if(leftMissFlag) {
                     leftMissFlag = false;
                 }
