@@ -144,7 +144,7 @@ public class MainActivity extends Activity  {
                 {
                     ((RadioButton) view).setChecked(false);
 
-                    Intent intent = new Intent(this, m2.class);
+                    Intent intent = new Intent(this, load_page_ball_1.class);
                     startActivity(intent);
 //                    Intent intent = new Intent(this, load_page_ball_1.class);
 //                    startActivity(intent);
@@ -165,8 +165,8 @@ public class MainActivity extends Activity  {
                         }
                         if (i>60){
                             // open level
-                            Intent intent = new Intent(this, m2.class);
-                            startActivity(intent);
+//                            Intent intent = new Intent(this, m2.class);
+//                            startActivity(intent);
                         }
                         else {
                             popupMessage_level2();                        }
@@ -193,8 +193,8 @@ public class MainActivity extends Activity  {
                         }
                         if (i>100){
                             // open level
-                            Intent intent = new Intent(this, m3.class);
-                            startActivity(intent);
+//                            Intent intent = new Intent(this, m3.class);
+//                            startActivity(intent);
                         }
                         else {
                             popupMessage_level3();
