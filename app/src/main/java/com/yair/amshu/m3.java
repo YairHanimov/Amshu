@@ -42,7 +42,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CameraFrameone  extends Activity implements View.OnTouchListener, CameraBridgeViewBase.CvCameraViewListener2  {
+public class m3  extends Activity implements View.OnTouchListener, CameraBridgeViewBase.CvCameraViewListener2  {
     private static final String  TAG              = "CameraFrameone";
     private boolean colorselect = false;
     private Mat dst, thespectrum;
@@ -92,7 +92,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
 
 
                     opencvcam.enableView();
-                    opencvcam.setOnTouchListener(CameraFrameone.this);
+                    opencvcam.setOnTouchListener(m3.this);
                 } break;
                 default:
                 {
@@ -413,7 +413,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                 if(rightMissFlag) {
                     rightMissFlag = false;
                 }
-               // this.start(); //start again the CountDownTimer
+                // this.start(); //start again the CountDownTimer
             }
         };
 
