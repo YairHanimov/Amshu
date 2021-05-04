@@ -226,11 +226,11 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         if (hitFlag) {
             Imgproc.rectangle(dst,new Point(0,0),new Point(dst.cols()/2,dst.rows()/2),new Scalar(224));
             Imgproc.rectangle(dst, new Point(faceX - faceWidth, faceY), new Point(faceX, faceY + faceHeight), new Scalar(0, 0, 255), 3);
-            Imgproc.rectangle(dst, new Point(faceX + faceWidth, faceY), new Point(faceX + 2 * faceWidth, faceY + faceHeight), new Scalar(255, 255, 255), 3);
+            //Imgproc.rectangle(dst, new Point(faceX + faceWidth, faceY), new Point(faceX + 2 * faceWidth, faceY + faceHeight), new Scalar(255, 255, 255), 3);
         } else {
             Imgproc.rectangle(dst,new Point(dst.cols()/2,0),new Point(dst.cols(),dst.rows()/2),new Scalar(24));
             Imgproc.rectangle(dst, new Point(faceX + faceWidth, faceY), new Point(faceX + 2 * faceWidth, faceY + faceHeight), new Scalar(0, 0, 255), 3);
-            Imgproc.rectangle(dst, new Point(faceX - faceWidth, faceY), new Point(faceX, faceY + faceHeight), new Scalar(255, 255, 255), 3);
+            //Imgproc.rectangle(dst, new Point(faceX - faceWidth, faceY), new Point(faceX, faceY + faceHeight), new Scalar(255, 255, 255), 3);
         }
         List<MatOfPoint> LHcontours,RHcontours, LMcontours,RMcountours;
         leftMissArea.setRectByDisplayRect();
@@ -245,7 +245,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         RHcontours=rightHitArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
         LMcontours= leftMissArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
         RMcountours=rightMissArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
-        drawBallCenter();
+        //drawBallCenter();
         if(RMcountours.size()>0&&!rightMissFlag&&!hitFlag){
             rightMissFlag =true;
             remainingTimeCounter.start();
@@ -338,35 +338,30 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         TextView timer_xml   = (TextView) findViewById(R.id.timer_time);
         ImageView ball  = (ImageView) findViewById(R.id.imageView8);
         ball.setVisibility(View.INVISIBLE);
-
         person_image.setVisibility(View.VISIBLE);
         timer_xml.setText(String.valueOf(5));
         timer_xml.setVisibility(View.VISIBLE);
-
         new CountDownTimer(5000, 1000) {
-
             TextView timer_xml   = (TextView) findViewById(R.id.timer_time);
-
             public void onTick(long millisUntilFinished) {
                 timer_xml.setText(String.valueOf((int)(millisUntilFinished / 1000)));
             }
-
             public void onFinish() {
                 ImageButton person_image  = (ImageButton) findViewById(R.id.button_person);
 
                 timer_xml.setVisibility(View.INVISIBLE);
                 person_image.setVisibility(View.INVISIBLE);
                 countBackFlag =true;
-                //remainingTimeCounter.start();
-
             }
 
         }.start();
+        missDetect();
 
+    }
+    public void missDetect(){
         remainingTimeCounter =  new CountDownTimer(300, 100) {
             public void onTick(long millisUntilFinished) {
             }
-
             public void onFinish() {
                 Imgproc.putText(dst, "miss", new Point(dst.rows() / 2, dst.rows() / 2),
                         1, 2, new Scalar(0, 255, 0));
@@ -378,7 +373,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                 if(rightMissFlag) {
                     rightMissFlag = false;
                 }
-               // this.start(); //start again the CountDownTimer
+                // this.start(); //start again the CountDownTimer
             }
         };
 
