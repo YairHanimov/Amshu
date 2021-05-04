@@ -33,16 +33,23 @@ public class scoremanager {
     public int   get_score_star(int star){
         return this.score_star;
     }
-    public  void addscore(int i ){
-        this.score_point= (this.score_point+i);
-        SharedPreferences shared = this.context.getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
-        String channel = (shared.getString("key", ""));
+    public  void addscore(int i, String level) {
+        this.score_point = (this.score_point + i);
+        try {
+            SharedPreferences shared = this.context.getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
+            String channel = (shared.getString(level, "0"));
+            if (channel != null) {
+                if (this.score_point >= Integer.parseInt(channel)) {
+                    SharedPreferences.Editor editor = sharedpreferences.edit();
+                    String num = String.valueOf(this.score_point);
+                    editor.putString(level, num);
+                    editor.apply();
+                }
+            }
+        }catch (Exception r){
 
-        if( this.score_point >=  Integer.parseInt(channel)){
-            SharedPreferences.Editor editor = sharedpreferences.edit();
-            String num = String.valueOf(this.score_point);
-            editor.putString("key", num);
-            editor.apply();        }
+        }
+
     }
 
 }

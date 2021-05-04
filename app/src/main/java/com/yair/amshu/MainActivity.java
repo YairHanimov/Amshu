@@ -54,7 +54,7 @@ public class MainActivity extends Activity  {
         setContentView(R.layout.firstscreen);
         try {
             SharedPreferences shared = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
-            String channel = (shared.getString("key", ""));
+            String channel = (shared.getString("level1", ""));
             int i;
             if (channel != null) {
                 i = Integer.parseInt(channel);

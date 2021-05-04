@@ -259,14 +259,14 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         else if (LHcontours.size() > 0 && hitFlag) {
             leftMissFlag =false;
             remainingTimeCounter.cancel();
-            scoremanage1.addscore(1);
+            scoremanage1.addscore(1,"level1");
             hitFlag = false;
             return;
         }
         else if (RHcontours.size() > 0 && !hitFlag) {
             leftMissFlag =false;
             remainingTimeCounter.cancel();
-            scoremanage1.addscore(1);
+            scoremanage1.addscore(1,"level1");
             hitFlag = true;
 
             return;
@@ -371,7 +371,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                 Imgproc.putText(dst, "miss", new Point(dst.rows() / 2, dst.rows() / 2),
                         1, 2, new Scalar(0, 255, 0));
                 if(scoremanage1.get_score()>0)
-                    scoremanage1.addscore(-1);
+                    scoremanage1.addscore(-1,"level1");
                 if(leftMissFlag) {
                     leftMissFlag = false;
                 }
