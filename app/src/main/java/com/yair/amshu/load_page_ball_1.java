@@ -19,7 +19,7 @@ public class load_page_ball_1 extends Activity {
     }
 
     public void go_to_start(View view) {
-        Intent intent = new Intent(this, CameraFrametwo.class);
+        Intent intent = new Intent(this, CameraFrameone.class);
         startActivity(intent);
     }
 
