@@ -307,6 +307,14 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
 
             @Override
             public void run() {
+                findViewById(R.id.scanbtn).setVisibility(View.INVISIBLE);
+                findViewById(R.id.qmark).setVisibility(View.INVISIBLE);
+                findViewById(R.id.qmark).setVisibility(View.INVISIBLE);
+                findViewById(R.id.score_counter_xml).setVisibility(View.INVISIBLE);
+                findViewById(R.id.textView).setVisibility(View.INVISIBLE);
+
+
+
                 findViewById(R.id.videoView2).setVisibility(View.VISIBLE);
                 VideoView videoView = (VideoView)findViewById(R.id.videoView2);
                 videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.test);
@@ -315,12 +323,24 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
 
                     @Override
                     public void onCompletion(MediaPlayer mp) {
+
                         findViewById(R.id.videoView2).setVisibility(View.INVISIBLE);
+                        findViewById(R.id.qmark).setVisibility(View.VISIBLE);
+                        findViewById(R.id.scanbtn).setVisibility(View.VISIBLE);
+                        findViewById(R.id.score_counter_xml).setVisibility(View.VISIBLE);
+                        findViewById(R.id.textView).setVisibility(View.VISIBLE);
+                        finish();
+                        overridePendingTransition(0, 0);
+                        startActivity(getIntent());
+                        overridePendingTransition(0, 0);
+
+
                     }
                 });
 
             }
         });
+
     }
     public void image_person_click(View view) {
     }

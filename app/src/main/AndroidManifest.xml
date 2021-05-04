@@ -8,12 +8,10 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="false"
-        android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
-
-    >
-
-        <activity android:name=".CameraFrameone"></activity>
-        <activity android:name=".CameraFrametwo"></activity>
+        android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+        <activity android:name=".Video_play"></activity>
+        <activity android:name=".CameraFrameone" />
+        <activity android:name=".CameraFrametwo" />
         <activity android:name=".load_page_ball_1" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -23,13 +21,13 @@
             </intent-filter>
         </activity>
     </application>
-    <uses-feature android:name="android.hardware.camera.front" />
     <uses-feature android:name="android.hardware.camera.front.autofocus" />
     <uses-feature android:name="android.hardware.camera" />
-
     <uses-feature android:name="android.hardware.camera.autofocus" />
-    <uses-permission android:name="android.permission.INTERNET" />
 
+    <uses-feature android:name="android.hardware.camera.front" />
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
 </manifest>
