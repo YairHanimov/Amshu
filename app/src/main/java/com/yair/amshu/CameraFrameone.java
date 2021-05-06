@@ -57,8 +57,8 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     protected boolean hitFlag =true, faceSizeFlag =true, countBackFlag, faceDetectFlag,
             leftMissFlag ,rightMissFlag;
     SharedPreferences sharedpreferences;
-    // MediaPlayer mp2 ;
-    // MediaPlayer mp1;
+     MediaPlayer mp2 ;
+     MediaPlayer mp1;
     protected HitArea leftHitArea,rightHitArea,leftMissArea,rightMissArea;
     protected int faceX, faceY, faceWidth, faceHeight;
     private List<Point> pointsDeque = new ArrayList<Point>();
@@ -73,6 +73,9 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         opencvcam.setVisibility(SurfaceView.VISIBLE);
         opencvcam.setCvCameraViewListener(this);
         scoremanage1 = new scoremanager(this);
+        mp2 = MediaPlayer.create(this, R.raw.butten_finger_speach);
+        mp1 = MediaPlayer.create(this, R.raw.speach_press_ball);
+        mp1.start();
     }
 
 
@@ -351,6 +354,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     }
 
     public void scan_btn(View view) {
+        mp2.start();
         setBallColor();
         view.setVisibility(View.INVISIBLE);
         ImageButton person_image  = (ImageButton) findViewById(R.id.button_person);
