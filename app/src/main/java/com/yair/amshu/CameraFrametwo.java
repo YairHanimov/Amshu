@@ -1,5 +1,7 @@
 package com.yair.amshu;
 
+import android.widget.RatingBar;
+
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
@@ -48,11 +50,27 @@ public class CameraFrametwo extends CameraFrameone {
         else if (hitDetection(rightHitArea) && !hitFlag) {
             leftMissFlag =false;
             remainingTimeCounter.cancel();
-            scoremanage1.addscore(1,"level1");
+            scoremanage1.addscore(1,"level2");
             hitFlag = true;
 
             return;
         }
     }
 
+    @Override
+    protected  void add1scorelevel(){
+        scoremanage1.addscore(1,"level2");
+    }
+    @Override
+    protected  void sub1scorelevel(){
+        if(scoremanage1.get_score()>0)
+            scoremanage1.addscore(-1,"level2");
+    }
+    @Override
+
+    public void starNotifay(){
+
+        RatingBar simpleRatingBar1 = (RatingBar) findViewById(R.id.ratingBaronline);
+        simpleRatingBar1.setRating(scoremanage1.getmaxstar("level2"));
+    }
 }

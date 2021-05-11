@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.SurfaceView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.VideoView;
 
@@ -59,6 +60,9 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     SharedPreferences sharedpreferences;
     MediaPlayer mp2 ;
     MediaPlayer mp1;
+    MediaPlayer to_high;
+    MediaPlayer miss;
+    MediaPlayer hit;
     protected HitArea leftHitArea,rightHitArea,leftMissArea,rightMissArea,topMissArea;
     protected int faceX, faceY, faceWidth, faceHeight;
     private List<Point> pointsDeque = new ArrayList<Point>();
@@ -72,10 +76,16 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
         opencvcam.setVisibility(SurfaceView.VISIBLE);
         opencvcam.setCvCameraViewListener(this);
-        scoremanage1 = new scoremanager(this);
+        scoremanage1 = new scoremanager(this,this);
        // mp2 = MediaPlayer.create(this, R.raw.butten_finger_speach);
         mp1 = MediaPlayer.create(this, R.raw.speach_press_ball);
-       // mp1.start();
+        miss=MediaPlayer.create(this, R.raw.misssound_game);
+        to_high= MediaPlayer.create(this, R.raw.too_high);
+        hit= MediaPlayer.create(this, R.raw.hit);
+        starNotifay();
+        mp1.start();
+
+
     }
 
 
@@ -244,7 +254,8 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         if(hitDetection(topMissArea)&&!topMissFlag){
             Imgproc.putText(dst, "too high", new Point(dst.rows() / 2, dst.rows() / 2),
                     2, 2, new Scalar(123, 44, 121));
-            scoremanage1.addscore(-1,"level1");
+            sub1scorelevel();
+            to_high.start();
             topMissFlag=true;
             remainingTimeCounter2.start();
             return;
@@ -262,14 +273,16 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         else if (hitDetection(leftHitArea) && hitFlag) {
             leftMissFlag =false;
             remainingTimeCounter.cancel();
-            scoremanage1.addscore(1,"level1");
+            add1scorelevel();
+            hit.start();
             hitFlag = false;
             return;
         }
         else if (hitDetection(rightHitArea) && !hitFlag) {
             leftMissFlag =false;
             remainingTimeCounter.cancel();
-            scoremanage1.addscore(1,"level1");
+            add1scorelevel();
+            hit.start();
             hitFlag = true;
 
             return;
@@ -322,6 +335,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                 findViewById(R.id.qmark).setVisibility(View.INVISIBLE);
                 findViewById(R.id.score_counter_xml).setVisibility(View.INVISIBLE);
                 findViewById(R.id.textView).setVisibility(View.INVISIBLE);
+                findViewById(R.id.ratingBaronline).setVisibility(View.INVISIBLE);
 
 
 
@@ -339,6 +353,8 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                         findViewById(R.id.scanbtn).setVisibility(View.VISIBLE);
                         findViewById(R.id.score_counter_xml).setVisibility(View.VISIBLE);
                         findViewById(R.id.textView).setVisibility(View.VISIBLE);
+                        findViewById(R.id.ratingBaronline).setVisibility(View.VISIBLE);
+
                         finish();
                         overridePendingTransition(0, 0);
                         startActivity(getIntent());
@@ -396,8 +412,9 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             public void onFinish() {
                 Imgproc.putText(dst, "miss", new Point(dst.rows() / 2, dst.rows() / 2),
                         1, 2, new Scalar(0, 255, 0));
-                if(scoremanage1.get_score()>0)
-                    scoremanage1.addscore(-1,"level1");
+
+                    sub1scorelevel();
+                    miss.start();
                 if(leftMissFlag) {
                     leftMissFlag = false;
                 }
@@ -509,5 +526,19 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             }
         });
 
+    }
+
+    protected void add1scorelevel(){
+        scoremanage1.addscore(1,"level1");
+    }
+    protected void sub1scorelevel(){
+        if(scoremanage1.get_score()>0)
+             scoremanage1.addscore(-1,"level1");
+    }
+
+    public void starNotifay(){
+
+        RatingBar simpleRatingBar1 = (RatingBar) findViewById(R.id.ratingBaronline);
+        simpleRatingBar1.setRating(scoremanage1.getmaxstar("level1"));
     }
 }

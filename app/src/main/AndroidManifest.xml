@@ -14,6 +14,9 @@
 
         <activity android:name=".CameraFrameone"></activity>
         <activity android:name=".CameraFrametwo"></activity>
+        <activity android:name=".CameraFramethree"></activity>
+        <activity android:name=".load_page_2"></activity>
+        <activity android:name=".load_page_3"></activity>
         <activity android:name=".load_page_ball_1" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -21,6 +24,8 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            android:screenOrientation="landscape"
+
         </activity>
     </application>
     <uses-feature android:name="android.hardware.camera.front" />
