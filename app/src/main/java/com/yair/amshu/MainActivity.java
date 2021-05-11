@@ -1,11 +1,13 @@
 package com.yair.amshu;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.LayerDrawable;
@@ -28,64 +30,20 @@ import android.widget.TextView;
 import android.widget.VideoView;
 
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.constraintlayout.solver.widgets.Rectangle;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
-import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
-import org.opencv.core.Core;
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfRect;
-import org.opencv.core.Point;
-import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.objdetect.CascadeClassifier;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends Activity  {
     private static final String  TAG              = "MainActivity";
 
-    private boolean colorselect = false;
-    private Mat dst, thespectrum;
-    private Scalar ballcolorrgb, ballcolorhsv, counter;
-    private Coloralgo ditaction;
-    private Size spectorsize;
-    private CascadeClassifier cascadeClassifier;
+
     public static final String MyPREFERENCES = "MyPrefs" ;
-    private Mat oldFrame;
-    private CameraBridgeViewBase opencvcam;
-    Mat mat1;
-    private int absoluteFaceSize;
-    private Rectangle rect1,rect2;
-    private Rect aaa,aaa2;
-    private boolean hitFlag =true,flag=true, countBackFlag =false,faceDetecFlag=false;
     SharedPreferences sharedpreferences;
-    // MediaPlayer mp2 ;
-    // MediaPlayer mp1;
-    int hitCounter=0;
-    int lag_crash=0;
-    int a = 0,b=0,c=0,d=0;
-    List<Point> pointsDeque = new ArrayList<Point>();
-    List<List<Point>> pointsDequeList=new ArrayList<>();
-    ArrayList<Mat> frames1=new ArrayList<>();
-    ArrayList<Mat> frames2=new ArrayList<>();
-
-
     public MainActivity() {
         Log.i(TAG, "Instantiated new " + this.getClass());
 
     }
-
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -100,17 +58,41 @@ public class MainActivity extends Activity  {
         setContentView(R.layout.firstscreen);
         try {
             SharedPreferences shared = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
-            String channel = (shared.getString("key", ""));
+            String channel = (shared.getString("level1", ""));
             int i;
             if (channel != null) {
                 i = Integer.parseInt(channel);
             } else {
                 i = 0;
             }
+            String channe2 = (shared.getString("level2", "0"));
+            int j;
+            if (channe2 != null) {
+                j = Integer.parseInt(channe2);
+            } else {
+                j = 0;
+            }String channel3 = (shared.getString("level3", "0"));
+            int k;
+            if (channel3 != null) {
+                k = Integer.parseInt(channel3);
+
+            } else {
+                k = 0;
+            }
             RatingBar simpleRatingBar1 = (RatingBar) findViewById(R.id.ratingBar);
             simpleRatingBar1.setRating(i);
             LayerDrawable stars = (LayerDrawable) simpleRatingBar1.getProgressDrawable();
             stars.getDrawable(2).setColorFilter(Color.YELLOW, PorterDuff.Mode.SRC_IN);
+
+            RatingBar simpleRatingBar2 = (RatingBar) findViewById(R.id.ratingBar2);
+            simpleRatingBar2.setRating(j);
+            LayerDrawable stars2 = (LayerDrawable) simpleRatingBar1.getProgressDrawable();
+            stars2.getDrawable(2).setColorFilter(Color.YELLOW, PorterDuff.Mode.SRC_IN);
+
+            RatingBar simpleRatingBar3 = (RatingBar) findViewById(R.id.ratingBar3);
+            simpleRatingBar3.setRating(k);
+            LayerDrawable stars3 = (LayerDrawable) simpleRatingBar1.getProgressDrawable();
+            stars3.getDrawable(2).setColorFilter(Color.YELLOW, PorterDuff.Mode.SRC_IN);
             //   mp2 = MediaPlayer.create(this, R.raw.butten_finger_speach);
             //     mp1 = MediaPlayer.create(this, R.raw.speach_press_ball);
         }
@@ -123,14 +105,9 @@ public class MainActivity extends Activity  {
             setContentView(R.layout.firstscreen);
         }
 
-
-
-
-
         //setContentView(R.layout.firstscreen);
-
+     checkCameraPermission();
     }
-
 
 
     public void onRadioButtonClicked(View view) {
@@ -144,10 +121,10 @@ public class MainActivity extends Activity  {
                 {
                     ((RadioButton) view).setChecked(false);
 
-//                    Intent intent = new Intent(this, CameraFrameone.class);
-//                    startActivity(intent);
                     Intent intent = new Intent(this, load_page_ball_1.class);
                     startActivity(intent);
+//                    Intent intent = new Intent(this, load_page_ball_1.class);
+//                    startActivity(intent);
 
                 }
                 break;
@@ -156,15 +133,23 @@ public class MainActivity extends Activity  {
                     ((RadioButton) view).setChecked(false);
                     try {
                         SharedPreferences shared = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
-                        String channel = (shared.getString("key", ""));
+                        String channel = (shared.getString("level1", "0"));
+
                         int i;
+
+
                         if (channel != null) {
                             i = Integer.parseInt(channel);
+
                         } else {
                             i = 0;
+
+
                         }
                         if (i>4){
-                            // open level
+                             //open level
+                            Intent intent = new Intent(this, load_page_2.class);
+                            startActivity(intent);
                         }
                         else {
                             popupMessage_level2();                        }
@@ -182,7 +167,7 @@ public class MainActivity extends Activity  {
                     ((RadioButton) view).setChecked(false);
                     try {
                         SharedPreferences shared = getSharedPreferences(MyPREFERENCES, MODE_PRIVATE);
-                        String channel = (shared.getString("key", ""));
+                        String channel = (shared.getString("level2", "0"));
                         int i;
                         if (channel != null) {
                             i = Integer.parseInt(channel);
@@ -191,6 +176,8 @@ public class MainActivity extends Activity  {
                         }
                         if (i>4){
                             // open level
+                            Intent intent = new Intent(this, load_page_3.class);
+                            startActivity(intent);
                         }
                         else {
                             popupMessage_level3();
@@ -206,13 +193,6 @@ public class MainActivity extends Activity  {
                 }
         }
     }
-
-
-
-
-
-
-
 
     public void vid_exm(View v){
         setContentView(R.layout.vid1_page);
@@ -243,12 +223,7 @@ public class MainActivity extends Activity  {
         //   mp2.stop();
         recreate();
 
-
-
     }
-
-
-
     public void back_to_menu(View view) {
         setContentView(R.layout.firstscreen);
 
@@ -269,7 +244,6 @@ public class MainActivity extends Activity  {
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
-
     public void popupMessage_level3(){
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
         alertDialogBuilder.setMessage("level  2 must be passed" +
@@ -288,4 +262,29 @@ public class MainActivity extends Activity  {
         alertDialog.show();
     }
 
+    private final int MY_PERMISSIONS_REQUEST_USE_CAMERA = 0x00AF;
+    private void checkCameraPermission(){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA ) != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG,"Permission not available requesting permission");
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA}, MY_PERMISSIONS_REQUEST_USE_CAMERA);
+        } else {
+            Log.d(TAG,"Permission has already granted");
+        }
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_USE_CAMERA: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG,"permission was granted! Do your stuff");
+                } else {
+                    Log.d(TAG,"permission denied! Disable the function related with permission.");
+                }
+                return;
+            }
+        }
+    }
 }

@@ -25,13 +25,17 @@ public class HitArea {
         this.frames=new ArrayList<>();
     }
     public void setRectByDisplayRect(){
-        this.rect.set(displayRect.x,displayRect.y,displayRect.width,displayRect.height);
+
+            this.rect.set(displayRect.x,displayRect.y,displayRect.width,displayRect.height);
     }
     public void setDisplayRect(Rectangle displayRect){
         this.displayRect=displayRect;
     }
     public void setRoiByRect(Mat frame){
-        this.roi=frame.submat(rect);
+        if(rect.x>=0&&rect.y>=0&&rect.height>=0&&rect.width>=0){
+            this.roi=frame.submat(rect);
+        }
+
     }
     public List<MatOfPoint> MovementDetection( Scalar lowColorBound,Scalar highColorBound) {
         Mat diff=new Mat();
