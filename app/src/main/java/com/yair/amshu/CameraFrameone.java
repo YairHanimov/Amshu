@@ -57,9 +57,9 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     protected boolean hitFlag =true, faceSizeFlag =true, countBackFlag, faceDetectFlag,
             leftMissFlag ,rightMissFlag;
     SharedPreferences sharedpreferences;
-     MediaPlayer mp2 ;
-     MediaPlayer mp1;
-    protected HitArea leftHitArea,rightHitArea,leftMissArea,rightMissArea;
+    MediaPlayer mp2 ;
+    MediaPlayer mp1;
+    protected HitArea leftHitArea,rightHitArea,leftMissArea,rightMissArea,topMissArea;
     protected int faceX, faceY, faceWidth, faceHeight;
     private List<Point> pointsDeque = new ArrayList<Point>();
     public CountDownTimer remainingTimeCounter;
@@ -73,9 +73,9 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         opencvcam.setVisibility(SurfaceView.VISIBLE);
         opencvcam.setCvCameraViewListener(this);
         scoremanage1 = new scoremanager(this);
-        mp2 = MediaPlayer.create(this, R.raw.butten_finger_speach);
+       // mp2 = MediaPlayer.create(this, R.raw.butten_finger_speach);
         mp1 = MediaPlayer.create(this, R.raw.speach_press_ball);
-        mp1.start();
+       // mp1.start();
     }
 
 
@@ -109,6 +109,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         rightHitArea=new HitArea();
         leftMissArea =new HitArea();
         rightMissArea=new HitArea();
+        topMissArea=new HitArea();
         ditaction = new Coloralgo();
         thespectrum = new Mat();
         ballcolorrgb = new Scalar(255);
@@ -214,59 +215,56 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             if (faceSizeFlag) {
                 faceWidth = facesArray[i].width * 2 / 3;
                 faceHeight = facesArray[i].height * 2 / 3;
+                leftMissArea.displayRect.setBounds(0,0,dst.cols()/2,dst.rows()/2);
+                rightMissArea.displayRect.setBounds(dst.cols()/2,0,dst.cols()/2,dst.rows()/2);
+
                 faceSizeFlag = false;
             }
+            Imgproc.rectangle(dst,new Point(0,0),new Point(dst.cols(),80),new Scalar(111,11,1),3);
             faceX = (facesArray[i].x > 0) ? facesArray[i].x : 0;
             faceY = (facesArray[i].y - faceHeight > 0) ? facesArray[i].y - faceHeight : 0;
+            topMissArea.displayRect.setBounds(0,0,dst.cols(),80);
             leftHitArea.displayRect.setBounds(faceX - faceWidth, faceY, faceWidth, faceHeight);
             rightHitArea.displayRect.setBounds(faceX + faceWidth, faceY, faceWidth, faceHeight);
-            leftMissArea.displayRect.setBounds(0,0,dst.cols()/2,dst.rows()/2);
-            rightMissArea.displayRect.setBounds(dst.cols()/2,0,dst.cols()/2,dst.rows()/2);
+
             faceDetectFlag =true;
         }
     }
     public void runGame(){
         if (hitFlag) {
-            Imgproc.rectangle(dst,new Point(0,0),new Point(dst.cols()/2,dst.rows()/2),new Scalar(224));
+          //  Imgproc.rectangle(dst,new Point(0,0),new Point(dst.cols()/2,dst.rows()/2),new Scalar(224));
             Imgproc.rectangle(dst, new Point(faceX - faceWidth, faceY), new Point(faceX, faceY + faceHeight), new Scalar(0, 0, 255), 3);
             //Imgproc.rectangle(dst, new Point(faceX + faceWidth, faceY), new Point(faceX + 2 * faceWidth, faceY + faceHeight), new Scalar(255, 255, 255), 3);
         } else {
-            Imgproc.rectangle(dst,new Point(dst.cols()/2,0),new Point(dst.cols(),dst.rows()/2),new Scalar(24));
+            //Imgproc.rectangle(dst,new Point(dst.cols()/2,0),new Point(dst.cols(),dst.rows()/2),new Scalar(24));
             Imgproc.rectangle(dst, new Point(faceX + faceWidth, faceY), new Point(faceX + 2 * faceWidth, faceY + faceHeight), new Scalar(0, 0, 255), 3);
             //Imgproc.rectangle(dst, new Point(faceX - faceWidth, faceY), new Point(faceX, faceY + faceHeight), new Scalar(255, 255, 255), 3);
         }
-        List<MatOfPoint> LHcontours,RHcontours, LMcontours,RMcountours;
-        leftMissArea.setRectByDisplayRect();
-        rightMissArea.setRectByDisplayRect();
-        leftHitArea.setRectByDisplayRect();
-        rightHitArea.setRectByDisplayRect();
-        leftHitArea.setRoiByRect(dst);
-        rightHitArea.setRoiByRect(dst);
-        leftMissArea.setRoiByRect(dst);
-        rightMissArea.setRoiByRect(dst);
-        LHcontours=leftHitArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
-        RHcontours=rightHitArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
-        LMcontours= leftMissArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
-        RMcountours=rightMissArea.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound());
-        //drawBallCenter();
-        if(RMcountours.size()>0&&!rightMissFlag&&!hitFlag){
+        drawBallCenter();
+        if(hitDetection(topMissArea)){
+            Imgproc.putText(dst, "too high", new Point(dst.rows() / 2, dst.rows() / 2),
+                    2, 2, new Scalar(123, 44, 121));
+            remainingTimeCounter.start();
+            return;
+        }
+        if(hitDetection(rightMissArea)&&!rightMissFlag&&!hitFlag){
             rightMissFlag =true;
             remainingTimeCounter.start();
             return;
         }
-        else if(LMcontours.size()>0&&!leftMissFlag&&hitFlag){
+        else if(hitDetection(leftMissArea)&&!leftMissFlag&&hitFlag){
             leftMissFlag =true;
             remainingTimeCounter.start();
             return;
         }
-        else if (LHcontours.size() > 0 && hitFlag) {
+        else if (hitDetection(leftHitArea) && hitFlag) {
             leftMissFlag =false;
             remainingTimeCounter.cancel();
             scoremanage1.addscore(1,"level1");
             hitFlag = false;
             return;
         }
-        else if (RHcontours.size() > 0 && !hitFlag) {
+        else if (hitDetection(rightHitArea) && !hitFlag) {
             leftMissFlag =false;
             remainingTimeCounter.cancel();
             scoremanage1.addscore(1,"level1");
@@ -275,7 +273,14 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             return;
         }
     }
-    private void drawBallCenter(){
+    protected boolean hitDetection(HitArea area){
+        area.setRectByDisplayRect();
+        area.setRoiByRect(dst);
+        if(area.MovementDetection(ditaction.getLowBound(),ditaction.getUpBound()).size()>0)
+            return true;
+        return false;
+    }
+    protected void drawBallCenter(){
         List<Point> centers = new ArrayList<Point>();
         float[] radius = new float[1];
         MatOfPoint2f list2f = new MatOfPoint2f();
@@ -354,7 +359,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     }
 
     public void scan_btn(View view) {
-        mp2.start();
+        //mp2.start();
         setBallColor();
         view.setVisibility(View.INVISIBLE);
         ImageButton person_image  = (ImageButton) findViewById(R.id.button_person);
@@ -400,6 +405,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                 // this.start(); //start again the CountDownTimer
             }
         };
+
 
 
     }
