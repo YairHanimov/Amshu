@@ -244,6 +244,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         if(hitDetection(topMissArea)&&!topMissFlag){
             Imgproc.putText(dst, "too high", new Point(dst.rows() / 2, dst.rows() / 2),
                     2, 2, new Scalar(123, 44, 121));
+            scoremanage1.addscore(-1,"level1");
             topMissFlag=true;
             remainingTimeCounter2.start();
             return;
