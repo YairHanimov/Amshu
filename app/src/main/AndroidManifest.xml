@@ -12,19 +12,37 @@
 
     >
 
-        <activity android:name=".CameraFrameone"></activity>
-        <activity android:name=".CameraFrametwo"></activity>
-        <activity android:name=".CameraFramethree"></activity>
-        <activity android:name=".load_page_2"></activity>
-        <activity android:name=".load_page_3"></activity>
-        <activity android:name=".load_page_ball_1" />
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".CameraFrameone"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".CameraFrametwo"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".CameraFramethree"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".load_page_2"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".load_page_3"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".load_page_ball_1"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".MainActivity"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            android:screenOrientation="landscape"
 
         </activity>
     </application>

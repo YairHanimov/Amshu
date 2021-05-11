@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".load_page_ball_1"
+    android:screenOrientation="portrait"
     android:id="@+id/loadpage"
     >
 
