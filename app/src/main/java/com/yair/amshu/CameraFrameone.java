@@ -55,14 +55,14 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     private int absoluteFaceSize;
     scoremanager scoremanage1;
     protected boolean hitFlag =true, faceSizeFlag =true, countBackFlag, faceDetectFlag,
-            leftMissFlag ,rightMissFlag;
+            leftMissFlag ,rightMissFlag,topMissFlag;
     SharedPreferences sharedpreferences;
     MediaPlayer mp2 ;
     MediaPlayer mp1;
     protected HitArea leftHitArea,rightHitArea,leftMissArea,rightMissArea,topMissArea;
     protected int faceX, faceY, faceWidth, faceHeight;
     private List<Point> pointsDeque = new ArrayList<Point>();
-    public CountDownTimer remainingTimeCounter;
+    public CountDownTimer remainingTimeCounter,remainingTimeCounter2;
 
 
     @Override
@@ -241,10 +241,11 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             //Imgproc.rectangle(dst, new Point(faceX - faceWidth, faceY), new Point(faceX, faceY + faceHeight), new Scalar(255, 255, 255), 3);
         }
         drawBallCenter();
-        if(hitDetection(topMissArea)){
+        if(hitDetection(topMissArea)&&!topMissFlag){
             Imgproc.putText(dst, "too high", new Point(dst.rows() / 2, dst.rows() / 2),
                     2, 2, new Scalar(123, 44, 121));
-            remainingTimeCounter.start();
+            topMissFlag=true;
+            remainingTimeCounter2.start();
             return;
         }
         if(hitDetection(rightMissArea)&&!rightMissFlag&&!hitFlag){
@@ -403,6 +404,13 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                     rightMissFlag = false;
                 }
                 // this.start(); //start again the CountDownTimer
+            }
+        };
+        remainingTimeCounter2 =  new CountDownTimer(700, 100) {
+            public void onTick(long millisUntilFinished) {
+            }
+            public void onFinish() {
+               topMissFlag=false;
             }
         };
 
