@@ -10,7 +10,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.VideoView;
 
-public class load_page_ball_1 extends Activity {
+public class LoadPageBall1 extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

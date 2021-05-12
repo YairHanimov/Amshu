@@ -5,14 +5,14 @@ import android.content.SharedPreferences;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class scoremanager {
+public class ScoreManager {
     Context context;
     CameraFrameone CameraFrameone;
     int score_point =0 ;
     int score_star =0 ;
     SharedPreferences sharedpreferences;
     public static final String MyPREFERENCES = "MyPrefs" ;
-    public scoremanager( Context c, CameraFrameone cam){
+    public ScoreManager(Context c, CameraFrameone cam){
         this.context=c;
         this.sharedpreferences = c.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
         this.CameraFrameone=cam;

@@ -25,14 +25,14 @@
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".load_page_2"
+            android:name=".Loadpage2"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".load_page_3"
+            android:name=".LoadPage3"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
-        <activity android:name=".load_page_ball_1"
+        <activity android:name=".LoadPageBall1"
             android:configChanges="orientation"
             android:screenOrientation="portrait" />
         <activity android:name=".MainActivity"

@@ -2,7 +2,6 @@ package com.yair.amshu;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -15,18 +14,12 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 
 import android.app.Activity;
-import android.os.CountDownTimer;
 import android.util.Log;
-import android.view.MotionEvent;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RatingBar;
-import android.widget.TextView;
 import android.widget.VideoView;
 
 import androidx.appcompat.app.AppCompatDelegate;
@@ -121,7 +114,7 @@ public class MainActivity extends Activity  {
                 {
                     ((RadioButton) view).setChecked(false);
 
-                    Intent intent = new Intent(this, load_page_ball_1.class);
+                    Intent intent = new Intent(this, LoadPageBall1.class);
                     startActivity(intent);
 //                    Intent intent = new Intent(this, load_page_ball_1.class);
 //                    startActivity(intent);
@@ -148,7 +141,7 @@ public class MainActivity extends Activity  {
                         }
                         if (i>4){
                              //open level
-                            Intent intent = new Intent(this, load_page_2.class);
+                            Intent intent = new Intent(this, Loadpage2.class);
                             startActivity(intent);
                         }
                         else {
@@ -176,7 +169,7 @@ public class MainActivity extends Activity  {
                         }
                         if (i>4){
                             // open level
-                            Intent intent = new Intent(this, load_page_3.class);
+                            Intent intent = new Intent(this, LoadPage3.class);
                             startActivity(intent);
                         }
                         else {

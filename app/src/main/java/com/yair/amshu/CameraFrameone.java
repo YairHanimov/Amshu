@@ -54,7 +54,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     public static final String MyPREFERENCES = "MyPrefs" ;
     private CameraBridgeViewBase opencvcam;
     private int absoluteFaceSize;
-    scoremanager scoremanage1;
+    ScoreManager scoremanage1;
     protected boolean hitFlag =true, faceSizeFlag =true, countBackFlag, faceDetectFlag,
             leftMissFlag ,rightMissFlag,topMissFlag;
     SharedPreferences sharedpreferences;
@@ -76,7 +76,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
         opencvcam.setVisibility(SurfaceView.VISIBLE);
         opencvcam.setCvCameraViewListener(this);
-        scoremanage1 = new scoremanager(this,this);
+        scoremanage1 = new ScoreManager(this,this);
        // mp2 = MediaPlayer.create(this, R.raw.butten_finger_speach);
         mp1 = MediaPlayer.create(this, R.raw.speach_press_ball);
         miss=MediaPlayer.create(this, R.raw.misssound_game);
@@ -372,7 +372,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     }
 
     public void exit_from_view(View view) {
-        Intent intent =   new Intent(this,load_page_ball_1.class);
+        Intent intent =   new Intent(this, LoadPageBall1.class);
         startActivity(intent);
     }
 
