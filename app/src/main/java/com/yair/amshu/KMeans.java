@@ -6,10 +6,12 @@ import org.opencv.core.Point;
 public  class KMeans {
     public static Point Cluster(MatOfPoint list){
         Point center=new Point(0,0);
+        double x = 0, y = 0;
         for(int i=0;i<list.toList().size();i++){
-            center.set(new double[]{list.toList().get(i).x+center.x, list.toList().get(i).y+center.y});
+            x+=list.toList().get(i).x;
+            y+=list.toList().get(i).y;
         }
-        center.set(new double[]{center.x/list.toList().size(),center.y/list.toList().size()});
+        center.set(new double[]{x/list.toList().size(),y/list.toList().size()});
         return center;
     }
 }
