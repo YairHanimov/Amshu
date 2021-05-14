@@ -10,7 +10,7 @@ import org.opencv.imgproc.Imgproc;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-public class Coloralgo {
+public class ColorDetector {
     // Lower and Upper bounds for range checking in HSV color space
     private Scalar LowBound = new Scalar(0);
     private Scalar UpBound = new Scalar(0);

@@ -40,12 +40,12 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     private boolean colorselect = false;
     protected Mat dst, thespectrum;
     private Scalar ballcolorrgb, ballcolorhsv;
-    protected Coloralgo ditaction;
+    protected ColorDetector ditaction;
     private Size spectorsize;
     private CascadeClassifier cascadeClassifier;
     private CameraBridgeViewBase opencvcam;
     private int absoluteFaceSize;
-    scoremanager scoremanage1;
+    ScoreManager scoremanage1;
     protected boolean hitFlag =true, faceSizeFlag =true, countBackFlag, faceDetectFlag,
             leftMissFlag ,rightMissFlag,topMissFlag;
     MediaPlayer openSound;
@@ -64,7 +64,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         opencvcam = (CameraBridgeViewBase) findViewById(R.id.mycamera);
         opencvcam.setVisibility(SurfaceView.VISIBLE);
         opencvcam.setCvCameraViewListener(this);
-        scoremanage1 = new scoremanager(this,this);
+        scoremanage1 = new ScoreManager(this,this);
         openSound = MediaPlayer.create(this, R.raw.speach_press_ball);
         missSound =MediaPlayer.create(this, R.raw.misssound_game);
         toHighsound = MediaPlayer.create(this, R.raw.too_high);
@@ -105,7 +105,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         leftMissArea =new HitArea();
         rightMissArea=new HitArea();
         topMissArea=new HitArea();
-        ditaction = new Coloralgo();
+        ditaction = new ColorDetector();
         thespectrum = new Mat();
         ballcolorrgb = new Scalar(255);
         ballcolorhsv = new Scalar(255);
@@ -334,7 +334,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     }
 
     public void exitFromView(View view) {
-        Intent intent =   new Intent(this,load_page_ball_1.class);
+        Intent intent =   new Intent(this,LoadPageBall1.class);
         startActivity(intent);
     }
     //while the user click the scan button
