@@ -309,7 +309,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                 findViewById(R.id.ratingBaronline).setVisibility(View.INVISIBLE);
                 findViewById(R.id.videoView2).setVisibility(View.VISIBLE);
                 VideoView videoView = (VideoView)findViewById(R.id.videoView2);
-                videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.test);
+                videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.vid_exm);
                 videoView.start();
                 videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
