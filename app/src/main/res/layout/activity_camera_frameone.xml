@@ -60,7 +60,7 @@
         android:layout_marginBottom="16dp"
         android:translationZ="90dp"
         android:background="@null"
-        android:onClick="exit_from_view"
+        android:onClick="exitFromView"
         android:src="@drawable/expic"
         android:text="Button"
         opencv:layout_constraintBottom_toBottomOf="parent"
@@ -72,7 +72,7 @@
         android:layout_width="123dp"
         android:layout_height="128dp"
         android:background="@null"
-        android:onClick="show_vid_one"
+        android:onClick="showVideo"
         android:src="@drawable/qmark"
         opencv:layout_constraintBottom_toBottomOf="parent"
         opencv:layout_constraintEnd_toEndOf="parent" />
@@ -96,7 +96,7 @@
 
         android:background="@null"
 
-        android:onClick="scan_btn"
+        android:onClick="scanButton"
         android:src="@drawable/scan_test"
         android:text="Button"
         app:layout_constraintEnd_toEndOf="parent"

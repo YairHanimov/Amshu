@@ -5,6 +5,7 @@ import androidx.constraintlayout.solver.widgets.Rectangle;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -14,28 +15,37 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HitArea {
-    public Rect rect;
+    private Rect rect;
     public Rectangle displayRect;
-    public Mat roi;
-    public ArrayList<Mat> frames;
+    private Mat roi;
+    private ArrayList<Mat> frames;
+    private Point topLeft;
+    private Point botRight;
     HitArea(){
         this.rect=new Rect();
         this.displayRect=new Rectangle();
         this.roi=new Mat();
         this.frames=new ArrayList<>();
+        this.topLeft=new Point(0,0);
+        this.botRight=new Point(0,0);
     }
     public void setRectByDisplayRect(){
-
             this.rect.set(displayRect.x,displayRect.y,displayRect.width,displayRect.height);
-    }
-    public void setDisplayRect(Rectangle displayRect){
-        this.displayRect=displayRect;
     }
     public void setRoiByRect(Mat frame){
         if(rect.x>=0&&rect.y>=0&&rect.height>=0&&rect.width>=0){
             this.roi=frame.submat(rect);
         }
-
+    }
+    public Point getDisplayRectTopLeft(){
+        this.topLeft.x=this.displayRect.x;
+        this.topLeft.y=this.displayRect.y;
+        return this.topLeft;
+    }
+    public Point getDisplayRectbotRight(){
+        this.botRight.x=this.displayRect.x+this.displayRect.width;
+        this.botRight.y=this.displayRect.y+this.displayRect.height;
+        return this.botRight;
     }
     public List<MatOfPoint> MovementDetection( Scalar lowColorBound,Scalar highColorBound) {
         Mat diff=new Mat();
