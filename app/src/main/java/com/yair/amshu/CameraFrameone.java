@@ -52,6 +52,8 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     MediaPlayer toHighsound;
     MediaPlayer missSound;
     MediaPlayer hitSound;
+    MediaPlayer timersound;
+
     protected HitArea leftHitArea,rightHitArea,leftMissArea,rightMissArea,topMissArea;
     protected int faceX, faceY, faceWidth, faceHeight;
     protected CountDownTimer remainingTimeCounter,remainingTimeCounter2;
@@ -69,6 +71,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         missSound =MediaPlayer.create(this, R.raw.misssound_game);
         toHighsound = MediaPlayer.create(this, R.raw.too_high);
         hitSound = MediaPlayer.create(this, R.raw.hit);
+        timersound = MediaPlayer.create(this,R.raw.timersound);
         starNotifay();
         openSound.start();
     }
@@ -339,6 +342,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     }
     //while the user click the scan button
     public void scanButton(View view) {
+        timersound.start();
         setBallColor();
         view.setVisibility(View.INVISIBLE);
         ImageButton person_image  = (ImageButton) findViewById(R.id.button_person);
