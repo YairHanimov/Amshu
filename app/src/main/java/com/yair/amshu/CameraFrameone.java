@@ -187,8 +187,8 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         }
         if(colorselect) {
             if(!faceDetectFlag){
-                Imgproc.rectangle(dst,new Point(dst.rows() / 2-50,dst.rows() / 2+60),
-                        new Point(dst.rows() / 2+250,dst.rows() / 2+150), new Scalar(255, 255, 255),-1);
+//                Imgproc.rectangle(dst,new Point(dst.rows() / 2-50,dst.rows() / 2+60),
+//                        new Point(dst.rows() / 2+250,dst.rows() / 2+150), new Scalar(255, 255, 255),-1);
                 Imgproc.putText(dst, "I need to see", new Point(dst.rows() / 2, dst.rows() / 2+90),
                         2, 1, blueColor);
                 Imgproc.putText(dst, "your face", new Point(dst.rows() / 2, dst.rows() / 2+140),
@@ -209,8 +209,8 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         Rect[] facesArray = faces.toArray();
         for (int i = 0; i < facesArray.length; i++) {
             if (facesArray.length > 1) {
-                Imgproc.rectangle(dst,new Point(dst.rows() / 2-50,dst.rows() / 2+60),
-                        new Point(dst.rows() / 2+250,dst.rows() / 2+150), new Scalar(255, 255, 255),-1);
+//                Imgproc.rectangle(dst,new Point(dst.rows() / 2-50,dst.rows() / 2+60),
+//                        new Point(dst.rows() / 2+250,dst.rows() / 2+150), new Scalar(255, 255, 255),-1);
                 Imgproc.putText(dst, "Only 1 person", new Point(dst.rows() / 2, dst.rows() / 2+90),
                         2, 1, blueColor);
                 Imgproc.putText(dst, "    Allowed", new Point(dst.rows() / 2, dst.rows() / 2+140),
