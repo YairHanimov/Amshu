@@ -1,9 +1,6 @@
 package com.yair.amshu;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -19,7 +16,7 @@ public class LoadPageBall1 extends Activity {
     }
 
     public void go_to_start(View view) {
-        Intent intent = new Intent(this, CameraFrameone.class);
+        Intent intent = new Intent(this, LevelsManager.class);
         startActivity(intent);
     }
 

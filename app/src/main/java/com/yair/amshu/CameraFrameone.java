@@ -47,7 +47,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     private int absoluteFaceSize;
     ScoreManager scoremanage1;
     protected boolean hitFlag =true, faceSizeFlag =true, countBackFlag, faceDetectFlag,
-            leftMissFlag ,rightMissFlag,topMissFlag;
+            leftMissFlag ,rightMissFlag,topMissFlag,toCloseFlag=true;
     MediaPlayer openSound;
     MediaPlayer toHighsound;
     MediaPlayer missSound;
@@ -134,7 +134,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     {
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
-           // Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            // Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, theLoaderCallback);
         } else {
             //Log.d(TAG, "OpenCV library found inside package. Using it!");
@@ -179,61 +179,69 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         Mat m=Imgproc.getRotationMatrix2D(new Point(cols/2,rows/2),90,0.75);
         Imgproc.warpAffine(rgba, dst,m,rgba.size());
         Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGBA2RGB);
-        //Imgproc.medianBlur(dst,dst,3);
+        Imgproc.medianBlur(dst,dst,3);
         TextView score   = (TextView) findViewById(R.id.score_counter_xml);
+        TextView user_log=(TextView) findViewById(R.id.textView3_user_log);
         score.setText(String.valueOf(scoremanage1.get_score()));
         if(countBackFlag) {
-            faceDetection();
+            if(faceDetection()==1)
+                return dst;
         }
         if(colorselect) {
-            if(!faceDetectFlag){
-//                Imgproc.rectangle(dst,new Point(dst.rows() / 2-50,dst.rows() / 2+60),
-//                        new Point(dst.rows() / 2+250,dst.rows() / 2+150), new Scalar(255, 255, 255),-1);
-                Imgproc.putText(dst, "I need to see", new Point(dst.rows() / 2, dst.rows() / 2+90),
-                        2, 1, blueColor);
-                Imgproc.putText(dst, "your face", new Point(dst.rows() / 2, dst.rows() / 2+140),
-                        2, 1, blueColor);
+            if(!toCloseFlag){
+                log_to_user("To close please step back",user_log);
                 return dst;
             }
+            if(!faceDetectFlag){
+                return dst;
+            }
+            Invisable_log_user(user_log);
             runGame();
         }
 
         return dst;
     }
-    public void faceDetection(){
+    public int faceDetection(){
+        TextView user_log=(TextView) findViewById(R.id.textView3_user_log);
         MatOfRect faces = new MatOfRect();
         if (cascadeClassifier != null) {
             cascadeClassifier.detectMultiScale(dst, faces, 1.1, 3, 2,
                     new Size(absoluteFaceSize, absoluteFaceSize), new Size());
         }
         Rect[] facesArray = faces.toArray();
+//        if(facesArray.length ==0)
+//        {
+//            log_to_user("Where are you?",user_log);
+//            return 1;
+//        }
         for (int i = 0; i < facesArray.length; i++) {
             if (facesArray.length > 1) {
-//                Imgproc.rectangle(dst,new Point(dst.rows() / 2-50,dst.rows() / 2+60),
-//                        new Point(dst.rows() / 2+250,dst.rows() / 2+150), new Scalar(255, 255, 255),-1);
-                Imgproc.putText(dst, "Only 1 person", new Point(dst.rows() / 2, dst.rows() / 2+90),
-                        2, 1, blueColor);
-                Imgproc.putText(dst, "    Allowed", new Point(dst.rows() / 2, dst.rows() / 2+140),
-                        2, 1, blueColor);
-                break;
+                log_to_user("Only 1 person",user_log);
+                return 1;
             }
+            Invisable_log_user(user_log);
             if (faceSizeFlag) {
                 faceWidth = facesArray[i].width * 2 / 3;
                 faceHeight = facesArray[i].height * 2 / 3;
                 leftMissArea.displayRect.setBounds(0,0,dst.cols()/2,dst.rows()/2);
                 rightMissArea.displayRect.setBounds(dst.cols()/2,0,dst.cols()/2,dst.rows()/2);
-
+                topMissArea.displayRect.setBounds(0,0,dst.cols(),80);
                 faceSizeFlag = false;
             }
             //Imgproc.rectangle(dst,new Point(0,0),new Point(dst.cols(),80),new Scalar(111,11,1),3);
             faceX = (facesArray[i].x > 0) ? facesArray[i].x : 0;
             faceY = (facesArray[i].y - faceHeight > 0) ? facesArray[i].y - faceHeight : 0;
-            topMissArea.displayRect.setBounds(0,0,dst.cols(),80);
+
             leftHitArea.displayRect.setBounds(faceX - faceWidth, faceY, faceWidth, faceHeight);
             rightHitArea.displayRect.setBounds(faceX + faceWidth, faceY, faceWidth, faceHeight);
-
+            if(rightHitArea.displayRect.y<80){
+                toCloseFlag =false;
+                return 0;
+            }
+            toCloseFlag=true;
             faceDetectFlag =true;
         }
+        return 0;
     }
     public void runGame(){
         if (hitFlag) {
@@ -300,10 +308,18 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     }
 
     public void showVideo(View view) {
+        if (openSound.isPlaying()){
+            openSound.stop();
+        }
+        if (timersound.isPlaying()){
+            timersound.stop();
+        }
         runOnUiThread(new Runnable() {
 
             @Override
             public void run() {
+                findViewById(R.id.button_exit).setVisibility(View.INVISIBLE);
+                findViewById(R.id.button_exit_2_video).setVisibility(View.VISIBLE);
                 findViewById(R.id.scanbtn).setVisibility(View.INVISIBLE);
                 findViewById(R.id.qmark).setVisibility(View.INVISIBLE);
                 findViewById(R.id.qmark).setVisibility(View.INVISIBLE);
@@ -312,12 +328,14 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                 findViewById(R.id.ratingBaronline).setVisibility(View.INVISIBLE);
                 findViewById(R.id.videoView2).setVisibility(View.VISIBLE);
                 VideoView videoView = (VideoView)findViewById(R.id.videoView2);
-                videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.vid_exm);
+                videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.ball1t);
                 videoView.start();
                 videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
                     @Override
                     public void onCompletion(MediaPlayer mp) {
+                        findViewById(R.id.button_exit).setVisibility(View.VISIBLE);
+
                         findViewById(R.id.videoView2).setVisibility(View.INVISIBLE);
                         findViewById(R.id.qmark).setVisibility(View.VISIBLE);
                         findViewById(R.id.scanbtn).setVisibility(View.VISIBLE);
@@ -333,20 +351,33 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             }
         });
     }
-    public void image_person_click(View view) {
-    }
+
 
     public void exitFromView(View view) {
+        if (openSound.isPlaying()){
+            openSound.stop();
+        }
+        if (timersound.isPlaying()){
+            timersound.stop();
+        }
         Intent intent =   new Intent(this,LoadPageBall1.class);
         startActivity(intent);
     }
     //while the user click the scan button
     public void scanButton(View view) {
+        if (openSound.isPlaying()){
+            openSound.stop();
+        }
+        if (timersound.isPlaying()){
+            timersound.stop();
+        }
         timersound.start();
         setBallColor();
         view.setVisibility(View.INVISIBLE);
         ImageButton person_image  = (ImageButton) findViewById(R.id.button_person);
         person_image.setVisibility(View.VISIBLE);
+        ImageButton qumarkb  = (ImageButton) findViewById(R.id.qmark);
+        qumarkb.setVisibility(View.INVISIBLE);
         TextView timer_xml   = (TextView) findViewById(R.id.timer_time);
         ImageView ball  = (ImageView) findViewById(R.id.imageView8);
         ball.setVisibility(View.INVISIBLE);
@@ -376,8 +407,8 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             public void onTick(long millisUntilFinished) {
             }
             public void onFinish() {
-                    subScore();
-                    missSound.start();
+                subScore();
+                missSound.start();
                 if(leftMissFlag)
                     leftMissFlag = false;
                 if(rightMissFlag)
@@ -388,7 +419,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             public void onTick(long millisUntilFinished) {
             }
             public void onFinish() {
-               topMissFlag=false;
+                topMissFlag=false;
             }
         };
     }
@@ -463,11 +494,35 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     //Subtraction score when miss
     protected void subScore(){
         if(scoremanage1.get_score()>0)
-             scoremanage1.addscore(-1,levelName);
+            scoremanage1.addscore(-1,levelName);
     }
     //Notify when the user get another star
     public void starNotifay(){
         RatingBar simpleRatingBar1 = (RatingBar) findViewById(R.id.ratingBaronline);
         simpleRatingBar1.setRating(scoremanage1.getmaxstar(levelName));
     }
+    void log_to_user(final String log, final TextView user_log){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                findViewById(R.id.textView3_user_log).setVisibility(View.VISIBLE);
+                user_log.setText(log);
+            }
+        });
+    }
+    void Invisable_log_user(final TextView user_log){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                findViewById(R.id.textView3_user_log).setVisibility(View.INVISIBLE);
+            }
+        });
+    }
+    public void exitFromView_ofinervid(View view) {
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(getIntent());
+        overridePendingTransition(0, 0);
+    }
+
 }
