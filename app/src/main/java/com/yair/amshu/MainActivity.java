@@ -47,7 +47,6 @@ public class MainActivity extends Activity  {
         setContentView(R.layout.firstscreen);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        checkCameraPermission();
         Intent intent = new Intent(this, LoadPageBall1.class);
         startActivity(intent);
 //        sharedpreferences = getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
@@ -260,29 +259,5 @@ public class MainActivity extends Activity  {
 //        alertDialog.show();
 //    }
 
-    private final int MY_PERMISSIONS_REQUEST_USE_CAMERA = 0x00AF;
-    private void checkCameraPermission(){
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA ) != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG,"Permission not available requesting permission");
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.CAMERA}, MY_PERMISSIONS_REQUEST_USE_CAMERA);
-        } else {
-            Log.d(TAG,"Permission has already granted");
-        }
-    }
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_USE_CAMERA: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(TAG,"permission was granted! Do your stuff");
-                } else {
-                    Log.d(TAG,"permission denied! Disable the function related with permission.");
-                }
-                return;
-            }
-        }
-    }
+
 }
