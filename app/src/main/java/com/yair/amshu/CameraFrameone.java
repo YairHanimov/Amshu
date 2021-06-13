@@ -58,7 +58,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     protected int faceX, faceY, faceWidth, faceHeight;
     protected CountDownTimer remainingTimeCounter,remainingTimeCounter2;
     protected Scalar blueColor;
-    protected int numberOfBall=1;
+    protected int numberOfBall=2;
     private String levelName="level1";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
