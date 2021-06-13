@@ -15,6 +15,7 @@ import java.util.List;
 public class CameraFrametwo extends CameraFrameone {
     protected Scalar whiteColor=new Scalar(255,255,255);
     private String levelName="level2";
+    protected int numberOfBall=3;
     @Override
     public void runGame(){
         if (hitFlag) {

@@ -7,6 +7,7 @@ import org.opencv.imgproc.Imgproc;
 public class CameraFramethree  extends CameraFrametwo {
     private String levelName="level3";
     private int pointFlag =0;
+    protected int numberOfBall=4;
     @Override
     public void runGame(){
         if (hitFlag) {
