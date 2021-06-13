@@ -53,11 +53,12 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     MediaPlayer missSound;
     MediaPlayer hitSound;
     MediaPlayer timersound;
-
+    private List<Point> pointsDeque = new ArrayList<Point>();
     protected HitArea leftHitArea,rightHitArea,leftMissArea,rightMissArea,topMissArea;
     protected int faceX, faceY, faceWidth, faceHeight;
     protected CountDownTimer remainingTimeCounter,remainingTimeCounter2;
     protected Scalar blueColor;
+    protected int numberOfBall=2;
     private String levelName="level1";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -195,9 +196,14 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             if(!faceDetectFlag){
                 return dst;
             }
+            if(drawBallCenter()==1){
+                log_to_user("To many items detect",user_log);
+                return dst;
+            }
             Invisable_log_user(user_log);
             runGame();
         }
+
 
         return dst;
     }
@@ -211,7 +217,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         Rect[] facesArray = faces.toArray();
 //        if(facesArray.length ==0)
 //        {
-//            log_to_user("Where are you?",user_log);
+//            log_to_user("I need to see your face",user_log);
 //            return 1;
 //        }
         for (int i = 0; i < facesArray.length; i++) {
@@ -243,6 +249,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         }
         return 0;
     }
+    //after all the enter process the game will start and the user will see where he should throw the ball
     public void runGame(){
         if (hitFlag) {
             Imgproc.rectangle(dst, leftHitArea.getDisplayRectTopLeft(), leftHitArea.getDisplayRectbotRight(), blueColor, 3);
@@ -251,7 +258,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             Imgproc.rectangle(dst, rightHitArea.getDisplayRectTopLeft(), rightHitArea.getDisplayRectbotRight(), blueColor, 3);
             //Imgproc.rectangle(dst, new Point(faceX - faceWidth, faceY), new Point(faceX, faceY + faceHeight), new Scalar(255, 255, 255), 3);
         }
-        drawBallCenter();
+
         if(hitDetection(topMissArea)&&!topMissFlag){
             subScore();
             toHighsound.start();
@@ -293,7 +300,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             return true;
         return false;
     }
-    protected void drawBallCenter(){
+    protected int drawBallCenter(){
         List<Point> centers = new ArrayList<Point>();
         //draw center of the ball
         ditaction.process(dst);
@@ -304,7 +311,20 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         //draw detecting line after ball movement
         for(Point center:centers) {
             Imgproc.drawMarker(dst, center, blueColor,1,7,3,3);
+            pointsDeque.add(center);
+//            if (pointsDeque.size() >= 5)
+//                pointsDeque.remove(0);
+//            for (int i = 0; i < pointsDeque.size() - 1; i++) {
+//                if (pointsDeque.get(i).x > 0 && pointsDeque.get(i).y > 0 &&
+//                        pointsDeque.get(i + 1).x > 0 && pointsDeque.get(i + 1).y > 0)
+//                    Imgproc.line(dst, pointsDeque.get(i), pointsDeque.get(i + 1),
+//                            new Scalar(141, 222, 23), 2);
+//            }
         }
+        if(centers.size()>numberOfBall){
+            return 1;
+        }
+        return 0;
     }
 
     public void showVideo(View view) {

@@ -82,7 +82,7 @@ public class LoadPageBall1 extends Activity {
     }
 
     public void quit_all(View view) {
-
+        finishAffinity();
         System.exit(0);
     }
 }
