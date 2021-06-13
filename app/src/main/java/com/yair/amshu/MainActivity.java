@@ -200,7 +200,10 @@ public class MainActivity extends Activity  {
 
             @Override
             public void onCompletion(MediaPlayer mp) {
-                setContentView(R.layout.loadpage);
+                finish();
+                overridePendingTransition(0, 0);
+                startActivity(getIntent());
+                overridePendingTransition(0, 0);
             }
         });
     }
@@ -211,7 +214,10 @@ public class MainActivity extends Activity  {
 
     }
     public  void  exit_from_vid_1 (View v){
-        setContentView(R.layout.loadpage);
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(getIntent());
+        overridePendingTransition(0, 0);
 
     }
 
