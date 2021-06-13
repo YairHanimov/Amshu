@@ -6,20 +6,23 @@
     android:layout_height="match_parent"
     android:screenOrientation="portrait"
     android:id="@+id/firstscreen"
+    android:background="@drawable/back"
     >
 
     <RadioButton
         android:id="@+id/radioButton1"
         android:layout_width="300dp"
         android:layout_height="100dp"
-        android:layout_marginTop="84dp"
+        android:layout_marginTop="120dp"
         android:onClick="onRadioButtonClicked"
-        android:text="        1 Ball"
+        android:text="       1 Ball"
         android:textSize="37dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.603"
+
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+
+        android:textColor="#000000"/>
 
     <RadioButton
         android:id="@+id/radioButton2"
@@ -30,23 +33,25 @@
         android:text="       2 Balls"
         android:textSize="37dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.603"
+
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/radioButton1" />
+        app:layout_constraintTop_toBottomOf="@+id/radioButton1"
+
+        android:textColor="#000000"/>
 
     <RadioButton
         android:id="@+id/radioButton3"
         android:layout_width="300dp"
         android:layout_height="100dp"
-        android:layout_marginTop="92dp"
+        android:layout_marginTop="68dp"
         android:text="       3 Balls"
         android:textSize="37dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.603"
         app:layout_constraintStart_toStartOf="parent"
         android:onClick="onRadioButtonClicked"
+        app:layout_constraintTop_toBottomOf="@+id/radioButton2"
 
-        app:layout_constraintTop_toBottomOf="@+id/radioButton2" />
+        android:textColor="#000000"/>
 
     <RatingBar
         android:id="@+id/ratingBar"
@@ -73,6 +78,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/radioButton2"
         app:layout_constraintVertical_bias="0.0"
+        android:layout_marginTop="12dp"
         android:numStars="5"
         android:rating="0"/>
 
@@ -81,7 +87,7 @@
         style="?android:attr/ratingBarStyleIndicator"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/radioButton3"

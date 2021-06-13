@@ -7,50 +7,37 @@
     tools:context=".LoadPageBall1"
     android:screenOrientation="portrait"
     android:id="@+id/loadpage"
+    android:background="@drawable/back"
     >
 
     <ImageButton
         android:id="@+id/button2"
-        android:layout_width="197dp"
-        android:layout_height="173dp"
-        android:layout_marginTop="72dp"
-        android:text="Button"
+        android:layout_width="322dp"
+        android:layout_height="93dp"
+        android:layout_marginTop="380dp"
         android:background="@null"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:src="@drawable/start"
         android:onClick="go_to_start"
-
-        />
+        android:src="@drawable/tutrial"
+        android:text="Button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.439"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/button7"
-        android:layout_width="197dp"
-        android:layout_height="173dp"
-        android:layout_marginTop="32dp"
-        android:text="Button"
+        android:layout_width="264dp"
+        android:layout_height="84dp"
+        android:layout_marginTop="80dp"
         android:background="@null"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button2"
         android:onClick="vid_exm"
-        android:src="@drawable/qmark"
-
-        />
-
-    <ImageButton
-        android:id="@+id/button8"
-        android:layout_width="191dp"
-        android:layout_height="147dp"
-        android:onClick="back_to_menu"
-        android:src="@drawable/bmenu"
+        android:src="@drawable/start"
         android:text="Button"
-
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.494"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button7"
-        app:layout_constraintVertical_bias="0.314" />
+
+        app:layout_constraintTop_toBottomOf="@+id/button2" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

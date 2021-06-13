@@ -47,17 +47,18 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
     private int absoluteFaceSize;
     ScoreManager scoremanage1;
     protected boolean hitFlag =true, faceSizeFlag =true, countBackFlag, faceDetectFlag,
-            leftMissFlag ,rightMissFlag,topMissFlag;
+            leftMissFlag ,rightMissFlag,topMissFlag,toCloseFlag=true;
     MediaPlayer openSound;
     MediaPlayer toHighsound;
     MediaPlayer missSound;
     MediaPlayer hitSound;
     MediaPlayer timersound;
-
+    private List<Point> pointsDeque = new ArrayList<Point>();
     protected HitArea leftHitArea,rightHitArea,leftMissArea,rightMissArea,topMissArea;
     protected int faceX, faceY, faceWidth, faceHeight;
     protected CountDownTimer remainingTimeCounter,remainingTimeCounter2;
     protected Scalar blueColor;
+    protected int numberOfBall=1;
     private String levelName="level1";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -179,62 +180,76 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         Mat m=Imgproc.getRotationMatrix2D(new Point(cols/2,rows/2),90,0.75);
         Imgproc.warpAffine(rgba, dst,m,rgba.size());
         Imgproc.cvtColor(dst, dst, Imgproc.COLOR_RGBA2RGB);
-        //Imgproc.medianBlur(dst,dst,3);
+        Imgproc.medianBlur(dst,dst,3);
         TextView score   = (TextView) findViewById(R.id.score_counter_xml);
+        TextView user_log=(TextView) findViewById(R.id.textView3_user_log);
         score.setText(String.valueOf(scoremanage1.get_score()));
         if(countBackFlag) {
-            faceDetection();
+            if(faceDetection()==1)
+                return dst;
         }
         if(colorselect) {
-            if(!faceDetectFlag){
-                Imgproc.rectangle(dst,new Point(dst.rows() / 2-50,dst.rows() / 2+60),
-                        new Point(dst.rows() / 2+250,dst.rows() / 2+150), new Scalar(255, 255, 255),-1);
-                Imgproc.putText(dst, "I need to see", new Point(dst.rows() / 2, dst.rows() / 2+90),
-                        2, 1, blueColor);
-                Imgproc.putText(dst, "your face", new Point(dst.rows() / 2, dst.rows() / 2+140),
-                        2, 1, blueColor);
+            if(!toCloseFlag){
+                log_to_user("To close please step back",user_log);
                 return dst;
             }
+            if(!faceDetectFlag){
+                return dst;
+            }
+            if(drawBallCenter()==1){
+                log_to_user("To many items detect",user_log);
+                return dst;
+            }
+            Invisable_log_user(user_log);
             runGame();
         }
 
+
         return dst;
     }
-    public void faceDetection(){
+    public int faceDetection(){
+        TextView user_log=(TextView) findViewById(R.id.textView3_user_log);
         MatOfRect faces = new MatOfRect();
         if (cascadeClassifier != null) {
             cascadeClassifier.detectMultiScale(dst, faces, 1.1, 3, 2,
                     new Size(absoluteFaceSize, absoluteFaceSize), new Size());
         }
         Rect[] facesArray = faces.toArray();
+//        if(facesArray.length ==0)
+//        {
+//            log_to_user("I need to see your face",user_log);
+//            return 1;
+//        }
         for (int i = 0; i < facesArray.length; i++) {
             if (facesArray.length > 1) {
-                Imgproc.rectangle(dst,new Point(dst.rows() / 2-50,dst.rows() / 2+60),
-                        new Point(dst.rows() / 2+250,dst.rows() / 2+150), new Scalar(255, 255, 255),-1);
-                Imgproc.putText(dst, "Only 1 person", new Point(dst.rows() / 2, dst.rows() / 2+90),
-                        2, 1, blueColor);
-                Imgproc.putText(dst, "    Allowed", new Point(dst.rows() / 2, dst.rows() / 2+140),
-                        2, 1, blueColor);
-                break;
+                log_to_user("Only 1 person",user_log);
+                return 1;
             }
+            Invisable_log_user(user_log);
             if (faceSizeFlag) {
                 faceWidth = facesArray[i].width * 2 / 3;
                 faceHeight = facesArray[i].height * 2 / 3;
                 leftMissArea.displayRect.setBounds(0,0,dst.cols()/2,dst.rows()/2);
                 rightMissArea.displayRect.setBounds(dst.cols()/2,0,dst.cols()/2,dst.rows()/2);
-
+                topMissArea.displayRect.setBounds(0,0,dst.cols(),80);
                 faceSizeFlag = false;
             }
             //Imgproc.rectangle(dst,new Point(0,0),new Point(dst.cols(),80),new Scalar(111,11,1),3);
             faceX = (facesArray[i].x > 0) ? facesArray[i].x : 0;
             faceY = (facesArray[i].y - faceHeight > 0) ? facesArray[i].y - faceHeight : 0;
-            topMissArea.displayRect.setBounds(0,0,dst.cols(),80);
+
             leftHitArea.displayRect.setBounds(faceX - faceWidth, faceY, faceWidth, faceHeight);
             rightHitArea.displayRect.setBounds(faceX + faceWidth, faceY, faceWidth, faceHeight);
-
+            if(rightHitArea.displayRect.y<80){
+                toCloseFlag =false;
+                return 0;
+            }
+            toCloseFlag=true;
             faceDetectFlag =true;
         }
+        return 0;
     }
+    //after all the enter process the game will start and the user will see where he should throw the ball
     public void runGame(){
         if (hitFlag) {
             Imgproc.rectangle(dst, leftHitArea.getDisplayRectTopLeft(), leftHitArea.getDisplayRectbotRight(), blueColor, 3);
@@ -243,7 +258,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             Imgproc.rectangle(dst, rightHitArea.getDisplayRectTopLeft(), rightHitArea.getDisplayRectbotRight(), blueColor, 3);
             //Imgproc.rectangle(dst, new Point(faceX - faceWidth, faceY), new Point(faceX, faceY + faceHeight), new Scalar(255, 255, 255), 3);
         }
-        drawBallCenter();
+
         if(hitDetection(topMissArea)&&!topMissFlag){
             subScore();
             toHighsound.start();
@@ -285,7 +300,7 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             return true;
         return false;
     }
-    protected void drawBallCenter(){
+    protected int drawBallCenter(){
         List<Point> centers = new ArrayList<Point>();
         //draw center of the ball
         ditaction.process(dst);
@@ -296,14 +311,35 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         //draw detecting line after ball movement
         for(Point center:centers) {
             Imgproc.drawMarker(dst, center, blueColor,1,7,3,3);
+            pointsDeque.add(center);
+//            if (pointsDeque.size() >= 5)
+//                pointsDeque.remove(0);
+//            for (int i = 0; i < pointsDeque.size() - 1; i++) {
+//                if (pointsDeque.get(i).x > 0 && pointsDeque.get(i).y > 0 &&
+//                        pointsDeque.get(i + 1).x > 0 && pointsDeque.get(i + 1).y > 0)
+//                    Imgproc.line(dst, pointsDeque.get(i), pointsDeque.get(i + 1),
+//                            new Scalar(141, 222, 23), 2);
+//            }
         }
+        if(centers.size()>numberOfBall){
+            return 1;
+        }
+        return 0;
     }
 
     public void showVideo(View view) {
+        if (openSound.isPlaying()){
+            openSound.stop();
+        }
+        if (timersound.isPlaying()){
+            timersound.stop();
+        }
         runOnUiThread(new Runnable() {
 
             @Override
             public void run() {
+                findViewById(R.id.button_exit).setVisibility(View.INVISIBLE);
+                findViewById(R.id.button_exit_2_video).setVisibility(View.VISIBLE);
                 findViewById(R.id.scanbtn).setVisibility(View.INVISIBLE);
                 findViewById(R.id.qmark).setVisibility(View.INVISIBLE);
                 findViewById(R.id.qmark).setVisibility(View.INVISIBLE);
@@ -312,12 +348,14 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
                 findViewById(R.id.ratingBaronline).setVisibility(View.INVISIBLE);
                 findViewById(R.id.videoView2).setVisibility(View.VISIBLE);
                 VideoView videoView = (VideoView)findViewById(R.id.videoView2);
-                videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.vid_exm);
+                videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.ball1t);
                 videoView.start();
                 videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 
                     @Override
                     public void onCompletion(MediaPlayer mp) {
+                        findViewById(R.id.button_exit).setVisibility(View.VISIBLE);
+
                         findViewById(R.id.videoView2).setVisibility(View.INVISIBLE);
                         findViewById(R.id.qmark).setVisibility(View.VISIBLE);
                         findViewById(R.id.scanbtn).setVisibility(View.VISIBLE);
@@ -333,20 +371,33 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
             }
         });
     }
-    public void image_person_click(View view) {
-    }
+
 
     public void exitFromView(View view) {
+        if (openSound.isPlaying()){
+            openSound.stop();
+        }
+        if (timersound.isPlaying()){
+            timersound.stop();
+        }
         Intent intent =   new Intent(this,LoadPageBall1.class);
         startActivity(intent);
     }
     //while the user click the scan button
     public void scanButton(View view) {
+        if (openSound.isPlaying()){
+            openSound.stop();
+        }
+        if (timersound.isPlaying()){
+            timersound.stop();
+        }
         timersound.start();
         setBallColor();
         view.setVisibility(View.INVISIBLE);
         ImageButton person_image  = (ImageButton) findViewById(R.id.button_person);
         person_image.setVisibility(View.VISIBLE);
+        ImageButton qumarkb  = (ImageButton) findViewById(R.id.qmark);
+        qumarkb.setVisibility(View.INVISIBLE);
         TextView timer_xml   = (TextView) findViewById(R.id.timer_time);
         ImageView ball  = (ImageView) findViewById(R.id.imageView8);
         ball.setVisibility(View.INVISIBLE);
@@ -470,4 +521,28 @@ public class CameraFrameone  extends Activity implements View.OnTouchListener, C
         RatingBar simpleRatingBar1 = (RatingBar) findViewById(R.id.ratingBaronline);
         simpleRatingBar1.setRating(scoremanage1.getmaxstar(levelName));
     }
+    void log_to_user(final String log, final TextView user_log){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                findViewById(R.id.textView3_user_log).setVisibility(View.VISIBLE);
+                user_log.setText(log);
+            }
+        });
+    }
+    void Invisable_log_user(final TextView user_log){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                findViewById(R.id.textView3_user_log).setVisibility(View.INVISIBLE);
+            }
+        });
+    }
+    public void exitFromView_ofinervid(View view) {
+        finish();
+        overridePendingTransition(0, 0);
+        startActivity(getIntent());
+        overridePendingTransition(0, 0);
+    }
+
 }

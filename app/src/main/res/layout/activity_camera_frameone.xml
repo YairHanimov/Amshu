@@ -8,7 +8,6 @@
     android:screenOrientation="portrait"
     tools:context=".CameraFrameone"
     android:keepScreenOn="true">
-
     <org.opencv.android.JavaCameraView
         android:id="@+id/mycamera"
         android:layout_width="fill_parent"
@@ -20,9 +19,6 @@
         opencv:layout_constraintStart_toStartOf="parent"
         opencv:layout_constraintTop_toTopOf="parent"
         opencv:layout_constraintVertical_bias="1.0" />
-
-
-
     <ImageButton
         android:id="@+id/button_person"
         android:layout_width="273dp"
@@ -30,15 +26,12 @@
         android:layout_marginTop="164dp"
         android:alpha="0.75"
         android:background="@null"
-        android:onClick="image_person_click"
         android:src="@drawable/person_image2"
         android:text="Button"
         android:visibility="invisible"
-
         opencv:layout_constraintEnd_toEndOf="parent"
         opencv:layout_constraintStart_toStartOf="parent"
         opencv:layout_constraintTop_toTopOf="parent" />
-
     <ImageView
         android:id="@+id/imageView8"
         android:layout_width="177dp"
@@ -50,8 +43,6 @@
         opencv:layout_constraintHorizontal_bias="0.526"
         opencv:layout_constraintStart_toStartOf="parent"
         opencv:layout_constraintTop_toTopOf="parent" />
-
-
     <ImageButton
         android:id="@+id/button_exit"
         android:layout_width="139dp"
@@ -65,8 +56,20 @@
         android:text="Button"
         opencv:layout_constraintBottom_toBottomOf="parent"
         opencv:layout_constraintStart_toStartOf="parent" />
-
-
+    <ImageButton
+        android:id="@+id/button_exit_2_video"
+        android:layout_width="139dp"
+        android:layout_height="90dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginBottom="16dp"
+        android:translationZ="90dp"
+        android:background="@null"
+        android:onClick="exitFromView_ofinervid"
+        android:visibility="invisible"
+        android:src="@drawable/expic"
+        android:text="Button"
+        opencv:layout_constraintBottom_toBottomOf="parent"
+        opencv:layout_constraintStart_toStartOf="parent" />
     <ImageButton
         android:id="@+id/qmark"
         android:layout_width="123dp"
@@ -76,26 +79,20 @@
         android:src="@drawable/qmark"
         opencv:layout_constraintBottom_toBottomOf="parent"
         opencv:layout_constraintEnd_toEndOf="parent" />
-
     <VideoView
         android:id="@+id/videoView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="invisible"
-
         opencv:layout_constraintBottom_toBottomOf="parent"
         opencv:layout_constraintEnd_toEndOf="@+id/mycamera"
         opencv:layout_constraintStart_toStartOf="@+id/mycamera"
         opencv:layout_constraintTop_toTopOf="@+id/mycamera" />
-
-
     <ImageButton
         android:id="@+id/scanbtn"
         android:layout_width="137dp"
         android:layout_height="126dp"
-
         android:background="@null"
-
         android:onClick="scanButton"
         android:src="@drawable/scan_test"
         android:text="Button"
@@ -103,14 +100,11 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/score_counter_xml"
         app:layout_constraintTop_toTopOf="parent" />
-
     <RatingBar
         android:id="@+id/ratingBaronline"
         style="?android:attr/ratingBarStyleIndicator"
-
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:layout_marginStart="4dp"
         android:layout_marginTop="60dp"
         android:numStars="5"
@@ -119,7 +113,6 @@
         app:layout_constraintHorizontal_bias="0.15"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
     <TextView
         android:id="@+id/textView"
         android:layout_width="96dp"
@@ -131,7 +124,6 @@
         android:text="score : "
         opencv:layout_constraintStart_toStartOf="parent"
         opencv:layout_constraintTop_toTopOf="parent" />
-
     <TextView
         android:id="@+id/score_counter_xml"
         android:layout_width="75dp"
@@ -143,7 +135,6 @@
         android:text="0"
         opencv:layout_constraintStart_toEndOf="@+id/textView"
         opencv:layout_constraintTop_toTopOf="parent" />
-
     <TextView
         android:id="@+id/timer_time"
         android:layout_width="166dp"
@@ -152,7 +143,6 @@
         android:text="3"
         android:textColor="#7FFF00"
         android:visibility="invisible"
-
         android:textSize="150dp"
         opencv:layout_constraintBottom_toBottomOf="parent"
         opencv:layout_constraintEnd_toEndOf="parent"
@@ -160,7 +150,18 @@
         opencv:layout_constraintStart_toStartOf="parent"
         opencv:layout_constraintTop_toBottomOf="@+id/score_counter_xml"
         opencv:layout_constraintVertical_bias="0.058" />
-
-
-
+    <TextView
+        android:id="@+id/textView3_user_log"
+        android:layout_width="351dp"
+        android:layout_height="54dp"
+        android:background="#020709"
+        android:text=""
+        android:textColor="#7FFF00"
+        android:textSize="30dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.745"
+        opencv:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -21,6 +21,7 @@ public class HitArea {
     private ArrayList<Mat> frames;
     private Point topLeft;
     private Point botRight;
+    //constractor
     HitArea(){
         this.rect=new Rect();
         this.displayRect=new Rectangle();
@@ -29,6 +30,7 @@ public class HitArea {
         this.topLeft=new Point(0,0);
         this.botRight=new Point(0,0);
     }
+    //setters and getters
     public void setRectByDisplayRect(){
             this.rect.set(displayRect.x,displayRect.y,displayRect.width,displayRect.height);
     }
@@ -47,18 +49,22 @@ public class HitArea {
         this.botRight.y=this.displayRect.y+this.displayRect.height;
         return this.botRight;
     }
+    //detect movement by colors scala in the hit areas and return the detected countours of the moved item
     public List<MatOfPoint> MovementDetection( Scalar lowColorBound,Scalar highColorBound) {
         Mat diff=new Mat();
         Mat gray = new Mat();
         Mat mask=new Mat();
         Mat res=new Mat();
         List<MatOfPoint> contours = new ArrayList<>();
+        //create  the little mat of the hitarea
         Imgproc.cvtColor(this.roi, gray, Imgproc.COLOR_RGB2HSV_FULL);
+        //decide the colors that the mat will detect
         Core.inRange(gray, lowColorBound, highColorBound, mask);
+        //make bitwise between the big frame and the mask
         Core.bitwise_and(this.roi, this.roi, res, mask);
         this.frames.add(res);
         if (this.frames.size() != 2) return contours;
-
+        //find diff bitween 2 last frames
         Core.absdiff(this.frames.get(0), this.frames.get(1), diff);
         this.frames.remove(0);
         Imgproc.cvtColor(diff, gray, Imgproc.COLOR_RGB2GRAY);

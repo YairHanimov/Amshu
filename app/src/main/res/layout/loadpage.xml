@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:screenOrientation="portrait"
     android:id="@+id/loadpage"
+    android:background="#135A73"
     >
 
 

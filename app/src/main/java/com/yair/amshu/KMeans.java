@@ -4,6 +4,7 @@ import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 
 public  class KMeans {
+    //Get list of points and calulate the center of them
     public static Point Cluster(MatOfPoint list){
         Point center=new Point(0,0);
         double x = 0, y = 0;
