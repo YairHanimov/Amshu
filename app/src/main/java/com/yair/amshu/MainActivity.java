@@ -57,7 +57,7 @@ public class MainActivity extends Activity  {
     public void vid_exm(View v){
         setContentView(R.layout.vid1_page);
         VideoView videoView = (VideoView)findViewById(R.id.videoView);
-        videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.test);
+        videoView.setVideoPath("android.resource://"+getPackageName()+"/"+R.raw.vid_exm);
         videoView.start();
         videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
 

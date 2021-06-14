@@ -118,7 +118,7 @@ public class LevelsManager extends Activity {
 
 
                         }
-                        if (i>4){
+                        if (i>=4){
                             //open level
                             Intent intent = new Intent(this, CameraFrametwo.class);
                             startActivity(intent);
@@ -146,7 +146,7 @@ public class LevelsManager extends Activity {
                         } else {
                             i = 0;
                         }
-                        if (i>4){
+                        if (i>=4){
                             // open level
                             Intent intent = new Intent(this, CameraFramethree.class);
                             startActivity(intent);
